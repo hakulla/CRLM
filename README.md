@@ -25,7 +25,17 @@ apps and continuously improves itself.
 - Builds leave version, backup, and rollback clues; failures can be inspected, fixed, and retried.
 - It can change not only settings, but also its UI, tools, prompts, workflows, and build process.
 
-### 3. Deep customization
+### 3. Multilingual UI
+
+- English is the default UI language.
+- A built-in Chinese UI pack is available from Settings → Language.
+- After a model is configured, choose **Add language with model...**, enter a language name,
+  and CRLM translates the user-interface catalog and saves the pack locally.
+- Generated packs translate user-visible UI strings only. Source-code comments and model prompts
+  are never sent to the language-pack builder.
+- Packs are stored in `/sdcard/MobileAgent/languages/`.
+
+### 4. Deep customization
 
 - **Tools:** files, shell, screen reading, accessibility actions, browser, screenshots, and
   package installation, enabled only when needed.
@@ -35,7 +45,7 @@ apps and continuously improves itself.
 - **Workspaces:** keep multiple projects in separate directories.
 - **UI:** native Android views that the agent can continue to reshape.
 
-### 4. Local-first
+### 5. Local-first
 
 - The build toolchain, source, and most state live on the phone.
 - Local models run fully offline; cloud models are used only after you configure them.

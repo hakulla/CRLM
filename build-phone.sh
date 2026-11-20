@@ -44,6 +44,7 @@ trap cleanup EXIT
 rm -rf "$B"
 mkdir -p "$B/classes" "$B/dex" "$B/src" "$B/gen" "$B/assets"
 cp -r "$P/src/." "$B/src/"
+if [ -d "$P/assets" ]; then cp -r "$P/assets/." "$B/assets/"; fi
 cp "$P/AndroidManifest.xml" "$B/"
 cp -r "$P/res" "$B/res"
 

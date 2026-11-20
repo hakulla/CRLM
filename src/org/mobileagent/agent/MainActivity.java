@@ -558,6 +558,7 @@ public class MainActivity extends Activity {
                         Toast.LENGTH_LONG).show();
             }
         }
+        LanguageManager.apply(getWindow().getDecorView());
         handler.removeCallbacks(healthRunnable);
         handler.postDelayed(healthRunnable, 5000L);
     }
@@ -5681,7 +5682,7 @@ public class MainActivity extends Activity {
             }
         });
         TextView title = new TextView(this);
-        title.setText("Settings");
+        title.setText(LanguageManager.t(this, "Settings"));
         title.setTextColor(TEXT);
         title.setTextSize(16f);
         title.setTypeface(Typeface.DEFAULT_BOLD);
@@ -5732,6 +5733,16 @@ public class MainActivity extends Activity {
         accountInfo.addView(accountSub, new LinearLayout.LayoutParams(MATCH, WRAP));
         ImageView accountIcon = vectorIcon("ic_grid", MUTED);
         account.addView(accountIcon, iconSize(dp(20), 0));
+
+        addSettingsSection(content, "Language");
+        LinearLayout languageCard = settingsCard(content);
+        addSettingsRow(languageCard, "ic_grid", "Language",
+                LanguageManager.label(this), new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showLanguageDialog();
+                    }
+                });
 
         addSettingsSection(content, "Model");
         LinearLayout modelCard = settingsCard(content);
@@ -5976,6 +5987,7 @@ public class MainActivity extends Activity {
             window.setBackgroundDrawable(new ColorDrawable(BG));
             window.setLayout(MATCH, MATCH);
         }
+        LanguageManager.apply(root);
         dialog.show();
         if (window != null) {
             window.setLayout(MATCH, MATCH);
@@ -6011,6 +6023,77 @@ public class MainActivity extends Activity {
                 });
     }
 
+    private void showLanguageDialog() {
+        final java.util.List<String> codes = LanguageManager.codes(this);
+        final String[] items = new String[codes.size() + 1];
+        for (int i = 0; i < codes.size(); i++) {
+            items[i] = LanguageManager.displayName(this, codes.get(i));
+        }
+        items[items.length - 1] = "Add language with model...";
+        new android.app.AlertDialog.Builder(this)
+                .setTitle(LanguageManager.t(this, "Language"))
+                .setItems(items, new android.content.DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(android.content.DialogInterface dialog, int which) {
+                        if (which < codes.size()) {
+                            LanguageManager.set(MainActivity.this, codes.get(which));
+                            recreate();
+                            return;
+                        }
+                        addLanguageWithModel();
+                    }
+                })
+                .show();
+    }
+
+    private void addLanguageWithModel() {
+        AgentKit.input(this, "Add language", "Language name, e.g. Japanese", "",
+                "Translate", new AgentKit.InputHandler() {
+                    @Override
+                    public boolean onInput(String value, Dialog dialog) {
+                        final String name = value == null ? "" : value.trim();
+                        if (name.isEmpty()) {
+                            return false;
+                        }
+                        final android.app.ProgressDialog progress =
+                                new android.app.ProgressDialog(MainActivity.this);
+                        progress.setTitle("Building language pack");
+                        progress.setMessage("Translating UI strings...");
+                        progress.setCancelable(false);
+                        progress.show();
+                        LanguagePackBuilder.build(MainActivity.this, name,
+                                new LanguagePackBuilder.Progress() {
+                                    @Override
+                                    public void onProgress(String message) {
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                progress.setMessage(message);
+                                            }
+                                        });
+                                    }
+                                },
+                                new LanguagePackBuilder.Callback() {
+                                    @Override
+                                    public void onResult(boolean ok, String code, String message) {
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                progress.dismiss();
+                                                Toast.makeText(MainActivity.this, message,
+                                                        Toast.LENGTH_LONG).show();
+                                                if (ok) {
+                                                    recreate();
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
+                        return true;
+                    }
+                });
+    }
+
     private LinearLayout settingsCard(LinearLayout parent) {
         LinearLayout card = new LinearLayout(this);
         card.setOrientation(LinearLayout.VERTICAL);
@@ -6024,7 +6107,7 @@ public class MainActivity extends Activity {
 
     private void addSettingsSection(LinearLayout parent, String title) {
         TextView label = new TextView(this);
-        label.setText(title);
+        label.setText(LanguageManager.t(this, title));
         label.setTextColor(DIM);
         label.setTextSize(10.5f);
         label.setPadding(dp(6), dp(18), dp(6), dp(6));
@@ -6050,12 +6133,12 @@ public class MainActivity extends Activity {
         ImageView icon = vectorIcon(iconName, MUTED);
         row.addView(icon, iconSize(dp(19), dp(12)));
         TextView labelView = new TextView(this);
-        labelView.setText(label);
+        labelView.setText(LanguageManager.t(this, label));
         labelView.setTextColor(TEXT);
         labelView.setTextSize(13.5f);
         row.addView(labelView, new LinearLayout.LayoutParams(0, WRAP, 1f));
         TextView valueView = new TextView(this);
-        valueView.setText(value);
+        valueView.setText(LanguageManager.t(this, value));
         valueView.setTextColor(MUTED);
         valueView.setTextSize(10.5f);
         valueView.setSingleLine(true);

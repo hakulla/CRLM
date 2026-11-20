@@ -122,6 +122,7 @@ final class AgentKit {
     }
 
     static TextView title(Context context, String text, float size) {
+        text = LanguageManager.t(context, text);
         TextView view = new TextView(context);
         view.setText(text);
         view.setTextColor(TEXT);
@@ -131,6 +132,7 @@ final class AgentKit {
     }
 
     static TextView label(Context context, String text) {
+        text = LanguageManager.t(context, text);
         TextView view = new TextView(context);
         view.setText(text);
         view.setTextColor(TEXT);
@@ -141,6 +143,7 @@ final class AgentKit {
     }
 
     static TextView hint(Context context, String text) {
+        text = LanguageManager.t(context, text);
         TextView view = new TextView(context);
         view.setText(text);
         view.setTextColor(DIM);
@@ -151,6 +154,7 @@ final class AgentKit {
     }
 
     static TextView section(Context context, String text) {
+        text = LanguageManager.t(context, text);
         TextView view = new TextView(context);
         view.setText(text);
         view.setTextColor(DIM);
@@ -162,6 +166,7 @@ final class AgentKit {
 
     static Button button(Context context, String text, int background, int textColor,
                          boolean bold) {
+        text = LanguageManager.t(context, text);
         Button button = new Button(context);
         button.setText(text);
         button.setAllCaps(false);
@@ -245,7 +250,7 @@ final class AgentKit {
         row.addView(info, new LinearLayout.LayoutParams(0, WRAP, 1f));
         final TextView state = new TextView(context);
         final boolean[] value = {checked};
-        state.setText(checked ? "Open" : "Closed");
+        state.setText(LanguageManager.t(context, checked ? "Open" : "Closed"));
         state.setTextColor(checked ? SUCCESS : MUTED);
         state.setTextSize(10.5f);
         state.setTypeface(Typeface.DEFAULT_BOLD);
@@ -256,7 +261,7 @@ final class AgentKit {
             @Override
             public void onClick(View v) {
                 value[0] = !value[0];
-                state.setText(value[0] ? "Open" : "Closed");
+                state.setText(LanguageManager.t(context, value[0] ? "Open" : "Closed"));
                 state.setTextColor(value[0] ? SUCCESS : MUTED);
                 if (handler != null) {
                     handler.onToggle(value[0]);
@@ -343,6 +348,7 @@ final class AgentKit {
         dialog.show();
         if (window != null) {
             window.setLayout(MATCH, MATCH);
+            LanguageManager.apply(window.getDecorView());
         }
         return dialog;
     }
@@ -399,6 +405,7 @@ final class AgentKit {
         dialog.show();
         if (window != null) {
             window.setLayout(MATCH, WRAP);
+            LanguageManager.apply(window.getDecorView());
         }
         return dialog;
     }
@@ -418,7 +425,7 @@ final class AgentKit {
         LinearLayout content = column(context);
         content.setPadding(dp(context, 18), 0, dp(context, 18), 0);
         TextView messageView = new TextView(context);
-        messageView.setText(message);
+        messageView.setText(LanguageManager.t(context, message));
         messageView.setTextColor(MUTED);
         messageView.setTextSize(13f);
         messageView.setLineSpacing(dp(context, 3), 1f);

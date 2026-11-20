@@ -16,6 +16,9 @@ if [ -z "$VERSION_CODE" ] || [ -z "$VERSION_NAME" ]; then
 fi
 
 mkdir -p "$BUILD/classes" "$BUILD/dex" "$BUILD/gen" "$BUILD/assets"
+if [ -d "$ROOT/assets" ]; then
+  cp -R "$ROOT/assets/." "$BUILD/assets/"
+fi
 rm -f "$BUILD/res.zip" "$BUILD/base.apk" "$BUILD/aligned.apk" \
   "$BUILD/assets/source-seed.zip" \
   "$BUILD/MobileAgent.apk" "$BUILD/MobileAgent.apk.idsig" "$BUILD/dex/classes.dex"
