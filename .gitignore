@@ -1,0 +1,9 @@
+*.apk
+*.idsig
+*.keystore
+build/
+build-pc/
+toolchain-mac/
+.agent/
+app.apk
+bootstrap.zip
