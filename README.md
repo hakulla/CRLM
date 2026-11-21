@@ -73,6 +73,12 @@ These are the kinds of apps the agent has built, iterated, and installed on a ph
 These examples show that CRLM can produce real apps with UI, state, interaction, and long-term
 maintenance, not only a "Hello World".
 
+## Screenshots
+
+| Automation | MCP | Language |
+| --- | --- | --- |
+| ![Automation](docs/images/automation.png) | ![MCP Services](docs/images/mcp.png) | ![Language](docs/images/language.png) |
+
 ## Installation: choose Lite or Offline
 
 Releases provide two APKs with the same features. They differ only in how the build environment is
