@@ -75,9 +75,11 @@ maintenance, not only a "Hello World".
 
 ## Screenshots
 
-| Automation | MCP | Language |
-| --- | --- | --- |
-| ![Automation](docs/images/automation.png) | ![MCP Services](docs/images/mcp.png) | ![Language](docs/images/language.png) |
+| Settings | Model parameters |
+| --- | --- |
+| ![Settings](docs/images/settings.png) | ![Model parameters](docs/images/model-parameters.png) |
+| **Automation** | **MCP Services** |
+| ![Automation](docs/images/automation.png) | ![MCP Services](docs/images/mcp.png) |
 
 ## Installation: choose Lite or Offline
 
