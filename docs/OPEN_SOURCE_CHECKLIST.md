@@ -21,10 +21,10 @@ aid, not legal advice.
 
 ## Maintainer sign-off
 
-- [ ] Confirm that the employment/contract terms allow publishing this code under AGPL-3.0-only
-      and that the employer does not claim ownership of the contributed work.
-- [ ] Decide whether to delete or retain the old v1.3.1 release and old commit history that contain
-      the pre-cleanup User-Agent and README example.
+- [x] Maintainer confirms this is not a company work product and no employer-owned code is included.
+- [x] Old v1.3.1 Release and tag removed.
+- [ ] Optional: rewrite old commit history that contains the pre-cleanup User-Agent and README
+      example. This changes commit hashes and requires a force-push.
 - [ ] Review GPL/LGPL source-offer obligations for the Termux packages in the Offline bootstrap.
 - [ ] Confirm that the bundled debug keystore is acceptable for the intended distribution model.
-- [ ] Make the repository public only after the ownership review is complete.
+- [ ] Make the repository public only after the remaining sign-off items are complete.
