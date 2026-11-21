@@ -45,11 +45,10 @@ network. These are real device capabilities, so the following boundaries are par
 
 ## Reporting a vulnerability
 
-Private vulnerability reporting is available only for public repositories. Once the repository is
-public, maintainers should enable it in **Settings → Security and quality → Advanced Security**.
-The repository includes a custom [vulnerability report form](.github/VULNERABILITY_REPORT.yml).
-While the repository is private, contact the maintainer privately through GitHub instead of opening
-a public issue.
+Private vulnerability reporting is enabled for this public repository. Use the **Report a
+vulnerability** flow from the repository's **Security** tab; the repository includes a custom
+[vulnerability report form](.github/VULNERABILITY_REPORT.yml). Do not open a public issue for a
+security vulnerability.
 
 Include:
 

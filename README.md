@@ -11,7 +11,7 @@ edits it, runs the local Android build chain, installs the APK, restarts, and ke
 It is not just a chat assistant: it is a pocket workshop that turns ideas into runnable Android
 apps and continuously improves itself.
 
-> **Project status:** pre-release, version 1.3.3. Licensed under AGPL-3.0-only; see
+> **Project status:** public open-source release, version 1.3.3. Licensed under AGPL-3.0-only; see
 > [License](#license).
 
 ## Highlights
