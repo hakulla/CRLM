@@ -260,32 +260,37 @@ final class LocalConfig {
         return true;
     }
 
-    static String savedLabel() {
+    static String savedLabel(Context context) {
         if (!exists() && lastSavedAt <= 0L) {
-            return "Waiting for first saving";
+            return LanguageManager.t(context, "Waiting for first saving");
         }
         if (!lastError.isEmpty()) {
-            return "Writing failed";
+            return LanguageManager.t(context, "Writing failed");
         }
-        return "Autosaved · " + savedKeys + " Item";
+        return LanguageManager.t(context, "Autosaved · ") + savedKeys
+                + LanguageManager.t(context, " Item");
     }
 
-    static String detailText() {
+    static String detailText(Context context) {
         StringBuilder out = new StringBuilder();
-        out.append("Documents:").append(path()).append('\n');
-        out.append("Save:").append(savedKeys).append(" Item");
+        out.append(LanguageManager.t(context, "Documents:")).append(path()).append('\n');
+        out.append(LanguageManager.t(context, "Saved:")).append(savedKeys)
+                .append(LanguageManager.t(context, " items"));
         if (lastSavedAt > 0L) {
             out.append(" · ").append(formatTime(lastSavedAt));
         }
         out.append('\n');
         if (lastRestoreAt > 0L) {
-            out.append("Recent Completion:").append(lastRestoredCount).append(" Item · ")
+            out.append(LanguageManager.t(context, "Last completion:"))
+                    .append(lastRestoredCount).append(LanguageManager.t(context, " items · "))
                     .append(formatTime(lastRestoreAt)).append('\n');
         }
         if (!lastError.isEmpty()) {
-            out.append("Error:").append(lastError).append('\n');
+            out.append(LanguageManager.t(context, "Error:")).append(lastError).append('\n');
         }
-        out.append("Key policy:API Key, Install passwords, debug badges, and only store them in the application private storage, and do not write to this file.");
+        out.append(LanguageManager.t(context, "Key policy: "))
+                .append(LanguageManager.t(context,
+                        "API keys, install passwords, and debug tokens are stored only in app-private storage and are not written to this file."));
         return out.toString();
     }
 

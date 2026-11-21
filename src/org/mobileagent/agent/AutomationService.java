@@ -283,7 +283,8 @@ public class AutomationService extends Service {
                 manager.notify(DONE_ID, buildDoneNotification(title,
                         text + " · " + (elapsedMs / 1000L) + " sec", conversationId));
                 manager.notify(FGS_ID, buildNotification(
-                        "Automation enabled · " + enabledCount() + " Tasks", null, true));
+                        LanguageManager.t(this, "Automation enabled · ") + enabledCount()
+                                + LanguageManager.t(this, " Tasks"), null, true));
             }
         } catch (Throwable ignored) {
         }

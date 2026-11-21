@@ -97,10 +97,10 @@ final class ContextArchive {
         if (archived == 0) {
             return "";
         }
-        String header = "[Archive Index] I've already put the earlier one " + archived + " Can not open message "
-                + label(conversationId) + "(I'm sorry. " + firstLine + "-" + (line - 1)
-                + " Lines. Originals are not missing; details are needed context_search The blogger says:"
-                + "Do not guess what is in the summary.";
+        String header = "[Archive Index] " + archived + " earlier messages from "
+                + label(conversationId) + " (lines " + firstLine + "-" + (line - 1)
+                + ") were archived. The originals are not lost; use context_search when details are needed. "
+                + "Do not guess the archived content.";
         StringBuilder digest = new StringBuilder(header).append('\n');
         String body = facts.toString();
         if (body.length() > DIGEST_MAX_CHARS) {

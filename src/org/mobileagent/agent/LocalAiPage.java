@@ -481,7 +481,7 @@ final class LocalAiPage {
                                 public void run() {
                                     ai.deleteModel(target);
                                     host.toast(
-                                            "Other Organiser" + spec.name);
+                                            LanguageManager.t(activity, "Deleted model: ") + spec.name);
                                     refreshLocalAiPage(holder);
                                 }
                             });
@@ -581,7 +581,9 @@ final class LocalAiPage {
         LinearLayout content = AgentKit.column(activity);
         content.setPadding(host.dp(18), 0, host.dp(18), 0);
         content.addView(AgentKit.hint(activity,
-                        "Test " + spec.name + " Other OrganiserHTTP Status, redirection, header and front 128KB. "),
+                        LanguageManager.t(activity, "Testing ") + spec.name + "\n"
+                                + LanguageManager.t(activity,
+                                "Checks HTTP status, redirects, headers, and the first 128KB.")),
                 new LinearLayout.LayoutParams(MainActivity.MATCH, MainActivity.WRAP));
         final TextView status = AgentKit.title(activity, "Diagnosis...", 13f);
         status.setPadding(0, host.dp(12), 0, 0);

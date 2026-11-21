@@ -21,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.List;
+import java.util.Locale;
 
 /** Automation management: scheduled tasks, run now, history and enable/disable. */
 public class AutomationActivity extends Activity {
@@ -108,7 +109,7 @@ public class AutomationActivity extends Activity {
             @Override
             public void onClick(View v) {
                 AutomationService.stopCurrent(AutomationActivity.this);
-                Toast.makeText(AutomationActivity.this,
+                LanguageManager.toast(AutomationActivity.this,
                         "Requested to stop current automation tasks", Toast.LENGTH_SHORT).show();
             }
         });
@@ -148,18 +149,21 @@ public class AutomationActivity extends Activity {
         top.setGravity(Gravity.CENTER_VERTICAL);
         TextView name = AgentKit.title(this, task.name, 14f);
         top.addView(name, new LinearLayout.LayoutParams(0, WRAP, 1f));
-        TextView state = AgentKit.hint(this, task.enabled ? "Enabled" : "Disabled");
+        TextView state = AgentKit.hint(this,
+                LanguageManager.t(this, task.enabled ? "Enabled" : "Disabled"));
         state.setTextColor(task.enabled ? MainActivity.SUCCESS : MainActivity.DIM);
         top.addView(state, new LinearLayout.LayoutParams(WRAP, WRAP));
         card.addView(top, new LinearLayout.LayoutParams(MATCH, WRAP));
 
-        TextView summary = AgentKit.hint(this, task.scheduleSummary()
-                + " · Next time. " + AutomationStore.formatTime(task.nextRunAt));
+        TextView summary = AgentKit.hint(this, scheduleText(task)
+                + " · " + LanguageManager.t(this, "Next time.") + " "
+                + AutomationStore.formatTime(task.nextRunAt));
         card.addView(summary, new LinearLayout.LayoutParams(MATCH, WRAP));
 
-        String last = "No running record yet";
+        String last = LanguageManager.t(this, "No running record yet");
         if (task.lastRunAt > 0) {
-            last = "Last time. " + AutomationStore.formatRunTime(task.lastRunAt)
+            last = LanguageManager.t(this, "Last time.") + " "
+                    + AutomationStore.formatRunTime(task.lastRunAt)
                     + " · " + outcomeLabel(task.lastOutcome);
             if (task.lastError != null && !task.lastError.trim().isEmpty()) {
                 last += " · " + shorten(task.lastError, 60);
@@ -196,7 +200,7 @@ public class AutomationActivity extends Activity {
             @Override
             public void onClick(View v) {
                 AutomationService.runNow(AutomationActivity.this, task.id);
-                Toast.makeText(AutomationActivity.this,
+                LanguageManager.toast(AutomationActivity.this,
                         "Starts running:" + task.name, Toast.LENGTH_SHORT).show();
             }
         });
@@ -311,7 +315,7 @@ public class AutomationActivity extends Activity {
         content.addView(AgentKit.label(this, "Implementation plan"),
                 new LinearLayout.LayoutParams(MATCH, WRAP));
         final Spinner type = spinner(new String[]{
-                "Every N min/Hours/Oh, my God.", "Chile HH:mm", "Weekly HH:mm", "Monthly HH:mm"
+                "Every N minutes/hours/days", "Daily HH:mm", "Weekly HH:mm", "Monthly HH:mm"
         });
         content.addView(type, new LinearLayout.LayoutParams(MATCH, WRAP));
 
@@ -321,7 +325,7 @@ public class AutomationActivity extends Activity {
                 String.valueOf(intervalValue(target.intervalMinutes)), "N", false);
         intervalValue.setInputType(InputType.TYPE_CLASS_NUMBER);
         intervalRow.addView(intervalValue, new LinearLayout.LayoutParams(0, WRAP, 1f));
-        final Spinner intervalUnit = spinner(new String[]{"min", "Hours", "Oh, my God."});
+        final Spinner intervalUnit = spinner(new String[]{"minutes", "hours", "days"});
         LinearLayout.LayoutParams unitParams = new LinearLayout.LayoutParams(0, WRAP, 1f);
         unitParams.leftMargin = dp(6);
         intervalRow.addView(intervalUnit, unitParams);
@@ -336,23 +340,23 @@ public class AutomationActivity extends Activity {
         content.addView(clockRow, new LinearLayout.LayoutParams(MATCH, WRAP));
 
         final Spinner weekday = spinner(new String[]{
-                "Sunday", "Monday.", "Tuesday.", "Wednesday", "Thursday", "Friday.", "Saturday"
+                "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
         });
         weekday.setSelection(Math.max(0, Math.min(6, target.weekday - 1)));
         content.addView(weekday, new LinearLayout.LayoutParams(MATCH, WRAP));
 
-        final EditText dayOfMonth = numberField(target.dayOfMonth, "Number of months (in thousands)1-28)");
+        final EditText dayOfMonth = numberField(target.dayOfMonth, "Day of month (1-28)");
         content.addView(dayOfMonth, new LinearLayout.LayoutParams(MATCH, WRAP));
 
         final CheckBox readOnly = new CheckBox(this);
-        readOnly.setText("Read-only mode (cannot write)/Command/Networking)");
+        readOnly.setText("Read-only mode (no writes, commands, or network)");
         readOnly.setTextColor(MainActivity.TEXT);
         readOnly.setTextSize(12f);
         readOnly.setChecked(target.readOnly);
         content.addView(readOnly, new LinearLayout.LayoutParams(MATCH, WRAP));
 
         final CheckBox enabled = new CheckBox(this);
-        enabled.setText("Enable (to point auto-run)");
+        enabled.setText("Enable (run automatically at the scheduled time)");
         enabled.setTextColor(MainActivity.TEXT);
         enabled.setTextSize(12f);
         enabled.setChecked(existing == null || target.enabled);
@@ -401,7 +405,7 @@ public class AutomationActivity extends Activity {
         saveParams.leftMargin = dp(8);
         footer.addView(save, saveParams);
         final Dialog dialog = AgentKit.page(this,
-                existing == null ? "New Automation" : "Editorial automation", scroll, footer);
+                existing == null ? "New Automation" : "Edit Automation", scroll, footer);
 
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -415,8 +419,8 @@ public class AutomationActivity extends Activity {
                 String taskName = name.getText().toString().trim();
                 String taskPrompt = prompt.getText().toString().trim();
                 if (taskName.isEmpty() || taskPrompt.isEmpty()) {
-                    Toast.makeText(AutomationActivity.this,
-                            "Name and task command cannot be empty", Toast.LENGTH_SHORT).show();
+                    LanguageManager.toast(AutomationActivity.this,
+                            "Name and task instruction cannot be empty", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 int selected = type.getSelectedItemPosition();
@@ -456,7 +460,7 @@ public class AutomationActivity extends Activity {
                 }
                 dialog.dismiss();
                 render();
-                Toast.makeText(AutomationActivity.this, "Automation saved",
+                LanguageManager.toast(AutomationActivity.this, "Automation saved",
                         Toast.LENGTH_SHORT).show();
             }
         });
@@ -495,13 +499,43 @@ public class AutomationActivity extends Activity {
         return Math.max(5, minutes);
     }
 
+    private String scheduleText(AutomationStore.Task task) {
+        String time = String.format(Locale.US, "%02d:%02d", task.hour, task.minute);
+        if ("interval".equals(task.scheduleType)) {
+            if (task.intervalMinutes % 1440 == 0) {
+                return LanguageManager.t(this, "Every") + " "
+                        + (task.intervalMinutes / 1440) + " " + LanguageManager.t(this, "days");
+            }
+            if (task.intervalMinutes % 60 == 0) {
+                return LanguageManager.t(this, "Every") + " "
+                        + (task.intervalMinutes / 60) + " " + LanguageManager.t(this, "hours");
+            }
+            return LanguageManager.t(this, "Every") + " "
+                    + task.intervalMinutes + " " + LanguageManager.t(this, "minutes");
+        }
+        if ("weekly".equals(task.scheduleType)) {
+            String[] names = {"", "Sunday", "Monday", "Tuesday", "Wednesday",
+                    "Thursday", "Friday", "Saturday"};
+            int index = Math.max(1, Math.min(7, task.weekday));
+            return LanguageManager.t(this, "Every") + " "
+                    + LanguageManager.t(this, names[index]) + " " + time;
+        }
+        if ("monthly".equals(task.scheduleType)) {
+            return LanguageManager.t(this, "Monthly") + " "
+                    + Math.max(1, Math.min(28, task.dayOfMonth)) + " "
+                    + LanguageManager.t(this, "Day") + " " + time;
+        }
+        return LanguageManager.t(this, "Daily") + " " + time;
+    }
+
     private String outcomeLabel(String outcome) {
-        if ("completed".equals(outcome)) return "Completed";
-        if ("paused".equals(outcome)) return "Pause";
-        if ("stopped".equals(outcome)) return "Stop";
-        if ("failed".equals(outcome)) return "Failed";
-        if ("running".equals(outcome)) return "Running";
-        return outcome == null || outcome.isEmpty() ? "Unknown" : outcome;
+        if ("completed".equals(outcome)) return LanguageManager.t(this, "Completed");
+        if ("paused".equals(outcome)) return LanguageManager.t(this, "Pause");
+        if ("stopped".equals(outcome)) return LanguageManager.t(this, "Stop");
+        if ("failed".equals(outcome)) return LanguageManager.t(this, "Failed");
+        if ("running".equals(outcome)) return LanguageManager.t(this, "Running");
+        return outcome == null || outcome.isEmpty()
+                ? LanguageManager.t(this, "Unknown") : outcome;
     }
 
     private static String shorten(String text, int max) {

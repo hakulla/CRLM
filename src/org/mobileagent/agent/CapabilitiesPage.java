@@ -171,7 +171,7 @@ final class CapabilitiesPage {
         content.addView(knowledgeRow.view, knowledgeParams);
         final McpManager mcp = new McpManager(activity);
         final AgentKit.ValueRow mcpRow = AgentKit.selectRow(activity, "MCP Services",
-                mcp.loadServers().size() + " Services", null);
+                mcp.loadServers().size() + LanguageManager.t(activity, " Services"), null);
         mcpRow.view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

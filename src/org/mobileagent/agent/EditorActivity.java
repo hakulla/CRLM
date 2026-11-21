@@ -51,7 +51,7 @@ public class EditorActivity extends Activity {
         workspace = new Workspace(this).sub(workspacePath);
         relativePath = getIntent().getStringExtra("path");
         if (relativePath == null || relativePath.trim().isEmpty()) {
-            Toast.makeText(this, "Missing file path", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "Missing file path", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -114,7 +114,7 @@ public class EditorActivity extends Activity {
         editor = new EditText(this);
         editor.setTextColor(AgentKit.TEXT);
         editor.setHintTextColor(AgentKit.DIM);
-        editor.setHint("Edit text here...");
+        editor.setHint(LanguageManager.tUi(this, "Edit text here..."));
         editor.setTextSize(14.5f);
         editor.setTypeface(Typeface.MONOSPACE);
         editor.setLineSpacing(AgentKit.dp(this, 3), 1f);
@@ -156,7 +156,7 @@ public class EditorActivity extends Activity {
         try {
             File file = workspace.resolve(relativePath);
             if (file.isDirectory()) {
-                Toast.makeText(this, "This is the directory.", Toast.LENGTH_SHORT).show();
+                LanguageManager.toast(this, "This is the directory.", Toast.LENGTH_SHORT).show();
                 finish();
                 return;
             }
@@ -169,14 +169,14 @@ public class EditorActivity extends Activity {
                 return;
             }
             if (file.length() > MAX_BYTES) {
-                Toast.makeText(this, "File Over 512KB, Unedited", Toast.LENGTH_LONG).show();
+                LanguageManager.toast(this, "File Over 512KB, Unedited", Toast.LENGTH_LONG).show();
                 finish();
                 return;
             }
             byte[] data = readFile(file);
             for (byte value : data) {
                 if (value == 0) {
-                    Toast.makeText(this, "Binary files are not supported for editing", Toast.LENGTH_LONG).show();
+                    LanguageManager.toast(this, "Binary files are not supported for editing", Toast.LENGTH_LONG).show();
                     finish();
                     return;
                 }
@@ -188,7 +188,7 @@ public class EditorActivity extends Activity {
             saveButton.setText("Save");
             note.setText(parentLabel + " · UTF-8");
         } catch (Exception e) {
-            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+            LanguageManager.toast(this, e.getMessage(), Toast.LENGTH_LONG).show();
             finish();
         }
     }
@@ -197,17 +197,17 @@ public class EditorActivity extends Activity {
         try {
             File file = workspace.resolve(relativePath);
             if (file.isDirectory()) {
-                Toast.makeText(this, "Path is directory", Toast.LENGTH_SHORT).show();
+                LanguageManager.toast(this, "Path is directory", Toast.LENGTH_SHORT).show();
                 return;
             }
             File parent = file.getParentFile();
             if (parent != null && !parent.isDirectory() && !parent.mkdirs()) {
-                Toast.makeText(this, "Could not create directory", Toast.LENGTH_SHORT).show();
+                LanguageManager.toast(this, "Could not create directory", Toast.LENGTH_SHORT).show();
                 return;
             }
             byte[] data = editor.getText().toString().getBytes(StandardCharsets.UTF_8);
             if (data.length > MAX_BYTES) {
-                Toast.makeText(this, "More than content 512KB", Toast.LENGTH_SHORT).show();
+                LanguageManager.toast(this, "More than content 512KB", Toast.LENGTH_SHORT).show();
                 return;
             }
             FileOutputStream output = new FileOutputStream(file, false);
@@ -219,9 +219,9 @@ public class EditorActivity extends Activity {
             dirty = false;
             saveButton.setText("Save");
             note.setText(parentLabel + " · UTF-8 · Saved");
-            Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "Saved", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
-            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+            LanguageManager.toast(this, e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 

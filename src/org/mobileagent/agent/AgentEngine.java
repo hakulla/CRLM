@@ -579,7 +579,7 @@ final class AgentEngine {
             return errorJson(shot.error);
         }
         roundShots.add(shot);
-        return okJson("Can not open message" + shot.path);
+        return okJson("Screenshot saved: " + shot.path);
     }
 
     /** Read pictures files in the workspace as image_url Implanting the model and achieving 'see-the-art' */
@@ -6610,7 +6610,7 @@ final class AgentEngine {
                 }
             }
             roundShots = screenshots == null ? new ArrayList<>() : screenshots;
-            if (!name.startsWith("mcp_")) {
+            if (!name.startsWith("mcp_") || "mcp_discover".equals(name)) {
                 ToolRegistry.Invocation call;
                 try {
                     call = tools.prepare(name, args == null ? new JSONObject() : args, workspace.root());
@@ -9511,7 +9511,8 @@ final class AgentEngine {
             boolean toolchainOk = new File(toolchain, "android.jar").isFile()
                     && new File(toolchain, "d8.jar").isFile()
                     && new File(toolchain, "apksigner.jar").isFile()
-                    && (new File(toolchain, "mobileagent-debug.keystore").isFile()
+                    && (new File(toolchain, "crlm-debug.keystore").isFile()
+                    || new File(toolchain, "mobileagent-debug.keystore").isFile()
                     || new File(toolchain, "agent-debug.keystore").isFile());
             report.append(toolchainOk ? "[OK] Build Tool Chain File Complete\n"
                     : "[FAIL] The construction of the tool chain is missing android.jar/d8.jar/apksigner.jar/keystore\n");
@@ -9606,14 +9607,18 @@ final class AgentEngine {
                 return errorJson("Local build tool chain missing:toolchain As required android.jar, "
                         + "d8.jar, apksigner.jar");
             }
-            File keystore = new File(toolchain, "mobileagent-debug.keystore");
-            String alias = "mobileagent";
+            File keystore = new File(toolchain, "crlm-debug.keystore");
+            String alias = "crlm";
+            if (!keystore.isFile()) {
+                keystore = new File(toolchain, "mobileagent-debug.keystore");
+                alias = "mobileagent";
+            }
             if (!keystore.isFile()) {
                 keystore = new File(toolchain, "agent-debug.keystore");
                 alias = "agentdebug";
             }
             if (!keystore.isFile()) {
-                return errorJson("Missing signature keystore: toolchain/mobileagent-debug.keystore");
+                return errorJson("Missing signature keystore: toolchain/crlm-debug.keystore");
             }
             if (!Rootfs.get(appContext).ready() && !TermuxBridge.isInstalled(appContext)) {
                 return errorJson("There's no self-taught tool chain, no installed. Termux, Cannot build");
@@ -9662,16 +9667,22 @@ final class AgentEngine {
                     + "cleanup() { code=$?; rm -rf \"$LOCK\"; "
                     + "if [ \"$ok\" != 1 ]; then echo \"BUILD_FAILED stage=$stage exit=$code\"; fi; }\n"
                     + "trap cleanup EXIT\n"
-                    + "rm -rf \"$B\"; mkdir -p \"$B/classes\" \"$B/dex\" \"$B/src\" \"$B/gen\"\n"
+                    + "rm -rf \"$B\"; mkdir -p \"$B/classes\" \"$B/dex\" \"$B/src\" \"$B/gen\" \"$B/assets\"\n"
                     + "cp -r \"$P/src/.\" \"$B/src/\"\n"
                     + "cp \"$P/AndroidManifest.xml\" \"$B/\"\n"
                     + "cp -r \"$P/res\" \"$B/res\"\n"
+                    + "if [ -d \"$P/assets\" ]; then cp -r \"$P/assets/.\" \"$B/assets/\"; fi\n"
+                    + "rm -f \"$B/assets/source-seed.zip\"\n"
+                    + "(cd \"$P\" && zip -qr \"$B/assets/source-seed.zip\" . "
+                    + "-x 'build/*' 'app.apk' 'app.apk.tmp' '*.idsig' '*.keystore' '.git/*' "
+                    + "'assets/source-seed.zip' 'bootstrap.zip' 'assets/bootstrap.zip' 'toolchain-mac/*')\n"
                     // Resources must be linked before javac: R.java is an aapt2
                     // output, and compiling first breaks every project that uses R.
                     + "stage=resources; echo \"[stage] resources\"; S=$(date +%s)\n"
                     + "aapt2 compile --dir \"$B/res\" -o \"$B/res.zip\"\n"
                     + "aapt2 link -o \"$B/unsigned.apk\" -I \"$T/android.jar\" "
                     + "--manifest \"$B/AndroidManifest.xml\" --auto-add-overlay "
+                    + "-A \"$B/assets\" "
                     + "--java \"$B/gen\" \"$B/res.zip\"\n"
                     + "echo \"[build] resources $(( $(date +%s) - S ))s\"\n"
                     + "stage=javac; echo \"[stage] javac\"; S=$(date +%s)\n"
@@ -9705,6 +9716,8 @@ final class AgentEngine {
                     + "if [ ! -s \"$B/app.apk\" ] || [ \"$SIZE\" -lt 4096 ]; then echo \"BUILD_FAILED stage=verify: APK Missing or volume abnormality $SIZE\"; exit 93; fi\n"
                     + "if ! unzip -l \"$B/app.apk\" 2>/dev/null | grep -q 'classes.dex'; then echo \"BUILD_FAILED stage=verify: Missing classes.dex\"; exit 94; fi\n"
                     + "if ! unzip -l \"$B/app.apk\" 2>/dev/null | grep -q 'AndroidManifest.xml'; then echo \"BUILD_FAILED stage=verify: Missing AndroidManifest.xml\"; exit 95; fi\n"
+                    + "if ! unzip -l \"$B/app.apk\" 2>/dev/null | grep -q 'assets/source-seed.zip'; then echo \"BUILD_FAILED stage=verify: Missing assets/source-seed.zip\"; exit 96; fi\n"
+                    + "if [ -f \"$P/assets/lang/zh.json\" ] && ! unzip -l \"$B/app.apk\" 2>/dev/null | grep -q 'assets/lang/zh.json'; then echo \"BUILD_FAILED stage=verify: Missing assets/lang/zh.json\"; exit 97; fi\n"
                     + "cp \"$B/app.apk\" \"$P/app.apk.tmp\" && mv -f \"$P/app.apk.tmp\" \"$P/app.apk\"\n"
                     + "stage=done; ok=1; echo BUILD_OK \"$P/app.apk\" \"$SIZE\"\n";
 

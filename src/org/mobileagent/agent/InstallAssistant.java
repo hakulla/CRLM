@@ -107,7 +107,7 @@ final class InstallAssistant {
             @Override
             public void run() {
                 try {
-                    Toast.makeText(context, message, duration).show();
+                    LanguageManager.toast(context, message, duration).show();
                 } catch (Throwable ignored) {
                     // Installer/Host App The window may have been replaced by the system.Toast Failure does not affect the installation process.
                 }

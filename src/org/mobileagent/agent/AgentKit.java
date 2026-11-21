@@ -122,7 +122,7 @@ final class AgentKit {
     }
 
     static TextView title(Context context, String text, float size) {
-        text = LanguageManager.t(context, text);
+        text = LanguageManager.tUi(context, text);
         TextView view = new TextView(context);
         view.setText(text);
         view.setTextColor(TEXT);
@@ -132,7 +132,7 @@ final class AgentKit {
     }
 
     static TextView label(Context context, String text) {
-        text = LanguageManager.t(context, text);
+        text = LanguageManager.tUi(context, text);
         TextView view = new TextView(context);
         view.setText(text);
         view.setTextColor(TEXT);
@@ -143,7 +143,7 @@ final class AgentKit {
     }
 
     static TextView hint(Context context, String text) {
-        text = LanguageManager.t(context, text);
+        text = LanguageManager.tUi(context, text);
         TextView view = new TextView(context);
         view.setText(text);
         view.setTextColor(DIM);
@@ -154,7 +154,7 @@ final class AgentKit {
     }
 
     static TextView section(Context context, String text) {
-        text = LanguageManager.t(context, text);
+        text = LanguageManager.tUi(context, text);
         TextView view = new TextView(context);
         view.setText(text);
         view.setTextColor(DIM);
@@ -166,7 +166,7 @@ final class AgentKit {
 
     static Button button(Context context, String text, int background, int textColor,
                          boolean bold) {
-        text = LanguageManager.t(context, text);
+        text = LanguageManager.tUi(context, text);
         Button button = new Button(context);
         button.setText(text);
         button.setAllCaps(false);
@@ -202,7 +202,7 @@ final class AgentKit {
         field.setTextSize(14f);
         field.setTextColor(TEXT);
         field.setHintTextColor(DIM);
-        field.setHint(hint);
+        field.setHint(LanguageManager.tUi(context, hint));
         field.setBackground(rounded(context, CARD_SOFT, 12));
         field.setPadding(dp(context, 12), dp(context, 10), dp(context, 12), dp(context, 10));
         field.setSingleLine(!multiline);
@@ -427,7 +427,7 @@ final class AgentKit {
         LinearLayout content = column(context);
         content.setPadding(dp(context, 18), 0, dp(context, 18), 0);
         TextView messageView = new TextView(context);
-        messageView.setText(LanguageManager.t(context, message));
+        messageView.setText(LanguageManager.tUi(context, message));
         messageView.setTextColor(MUTED);
         messageView.setTextSize(13f);
         messageView.setLineSpacing(dp(context, 3), 1f);

@@ -248,7 +248,7 @@ public final class WorkCenterActivity extends Activity {
         card.addView(top);
 
         TextView meta = new TextView(this);
-        meta.setText("Source " + ticket.source + " · Scope " + ticket.scope
+        meta.setText(LanguageManager.t(this, "Source ") + ticket.source + LanguageManager.t(this, " · Scope ") + ticket.scope
                 + " · Steps " + ticket.step + (ticket.maxSteps > 0 ? "/" + ticket.maxSteps : "")
                 + " · " + age(ticket.heartbeatAt));
         meta.setTextColor(DIM);
@@ -513,7 +513,7 @@ public final class WorkCenterActivity extends Activity {
     }
 
     private void toast(String text) {
-        Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
+        LanguageManager.toast(this, text, Toast.LENGTH_SHORT).show();
     }
 
     private static String statusLabel(String status) {

@@ -6,6 +6,7 @@ import android.view.ViewTreeObserver;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONObject;
 
@@ -18,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.regex.Pattern;
 
 /** Small runtime localization layer for UI strings; code comments are never translated. */
 final class LanguageManager {
@@ -73,6 +75,115 @@ final class LanguageManager {
             }
         }
         return result;
+    }
+
+    private static final Pattern SENTENCE_BREAK =
+            Pattern.compile("(?<=[.!?])(?=[ \\t]*[A-Z])");
+
+    /**
+     * Translates UI-owned text, including paragraphs, newline-separated blocks and labels with
+     * dynamic values. Model/user content must not be passed here.
+     */
+    static String tUi(Context context, String text) {
+        if (text == null || text.isEmpty()) {
+            return text == null ? "" : text;
+        }
+        String code = current(context);
+        if (DEFAULT.equals(code)) {
+            return text;
+        }
+        return translateUi(pack(context, code), text, 0);
+    }
+
+    private static String translateUi(Map<String, String> map, String text, int depth) {
+        if (text == null || text.isEmpty() || depth > 8) {
+            return text;
+        }
+        String exact = lookup(map, text);
+        if (exact != null) {
+            return exact;
+        }
+        if (text.indexOf('\n') >= 0) {
+            String[] lines = text.split("\n", -1);
+            StringBuilder out = new StringBuilder();
+            boolean changed = false;
+            for (int i = 0; i < lines.length; i++) {
+                String translated = translateUi(map, lines[i], depth + 1);
+                changed |= !translated.equals(lines[i]);
+                out.append(translated);
+                if (i < lines.length - 1) {
+                    out.append('\n');
+                }
+            }
+            if (changed) {
+                return out.toString();
+            }
+        }
+        // Longest fixed prefix first: labels such as "Authorized, work area:" + dynamic path.
+        String prefix = null;
+        for (String key : map.keySet()) {
+            if (key.length() < 8 || (key.indexOf(' ') < 0 && !key.endsWith(":"))) {
+                continue;
+            }
+            if (text.startsWith(key) && !text.equals(key)
+                    && (prefix == null || key.length() > prefix.length())) {
+                prefix = key;
+            }
+        }
+        if (prefix != null) {
+            String translatedPrefix = map.get(prefix);
+            if (translatedPrefix != null && !translatedPrefix.isEmpty()) {
+                String tail = translateUi(map, text.substring(prefix.length()), depth + 1);
+                return translatedPrefix + tail;
+            }
+        }
+        String[] sentences = SENTENCE_BREAK.split(text);
+        if (sentences.length > 1) {
+            StringBuilder out = new StringBuilder();
+            boolean changed = false;
+            for (String sentence : sentences) {
+                String translated = translateUi(map, sentence, depth + 1);
+                changed |= !translated.equals(sentence);
+                out.append(translated);
+            }
+            if (changed) {
+                return out.toString();
+            }
+        }
+        return text;
+    }
+
+    private static String lookup(Map<String, String> map, String text) {
+        String value = map.get(text);
+        if (value != null && !value.isEmpty()) {
+            return value;
+        }
+        int start = 0;
+        int end = text.length();
+        while (start < end && Character.isWhitespace(text.charAt(start))) {
+            start++;
+        }
+        while (end > start && Character.isWhitespace(text.charAt(end - 1))) {
+            end--;
+        }
+        if (start == 0 && end == text.length()) {
+            value = map.get(text + "\n");
+            return value == null || value.isEmpty() ? null : value.trim();
+        }
+        String core = text.substring(start, end);
+        value = map.get(core);
+        if (value == null || value.isEmpty()) {
+            value = map.get(core + "\n");
+        }
+        if (value == null || value.isEmpty()) {
+            return null;
+        }
+        return text.substring(0, start) + value.trim() + text.substring(end);
+    }
+
+    static Toast toast(Context context, CharSequence text, int duration) {
+        String value = text == null ? "" : text.toString();
+        return Toast.makeText(context, tUi(context, value), duration);
     }
 
     static String label(Context context) {

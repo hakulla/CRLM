@@ -448,7 +448,7 @@ public class MainActivity extends Activity {
             input.requestFocus();
         }
         showChat();
-                Toast.makeText(this, "We've been brought to the wrong reporting site, confirmation post-dispatch to start processing.",
+                LanguageManager.toast(this, "We've been brought to the wrong reporting site, confirmation post-dispatch to start processing.",
                 Toast.LENGTH_LONG).show();
     }
 
@@ -492,14 +492,14 @@ public class MainActivity extends Activity {
                             ClipboardManager cm = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
                             if (cm != null) {
                                 cm.setPrimaryClip(ClipData.newPlainText("report", prompt == null ? "" : prompt));
-                                Toast.makeText(MainActivity.this, "Errors reported copied", Toast.LENGTH_SHORT).show();
+                                LanguageManager.toast(MainActivity.this, "Errors reported copied", Toast.LENGTH_SHORT).show();
                             }
                         }
                     })
                     .setNegativeButton("Okay.", null)
                     .show();
         } catch (Exception e) {
-            Toast.makeText(this, "The current task is still ongoing, errors are queued and will be automatically created for dialogue after completion",
+            LanguageManager.toast(this, "The current task is still ongoing, errors are queued and will be automatically created for dialogue after completion",
                     Toast.LENGTH_LONG).show();
         }
     }
@@ -554,7 +554,7 @@ public class MainActivity extends Activity {
                 openNewTaskFromReport(pendingPrompt);
             } else if (!queuedReportHintShown) {
                 queuedReportHintShown = true;
-                Toast.makeText(this, "Queue pending error reporting and automatically create a new dialogue after the end of the current mission",
+                LanguageManager.toast(this, "Queue pending error reporting and automatically create a new dialogue after the end of the current mission",
                         Toast.LENGTH_LONG).show();
             }
         }
@@ -757,7 +757,7 @@ public class MainActivity extends Activity {
                 }
                 ScreenshotWatchService.stop(MainActivity.this);
                 updateScreenshotModeBar();
-                Toast.makeText(MainActivity.this, "Exited Screen Screenshot Mode",
+                LanguageManager.toast(MainActivity.this, "Exited Screen Screenshot Mode",
                         Toast.LENGTH_SHORT).show();
             }
         });
@@ -835,16 +835,16 @@ public class MainActivity extends Activity {
                 if (engine.isPaused()) {
                     if (engine.resumeTask()) {
                         renderAll();
-                        Toast.makeText(MainActivity.this, "Keep on with your mission.",
+                        LanguageManager.toast(MainActivity.this, "Keep on with your mission.",
                                 Toast.LENGTH_SHORT).show();
                     } else {
-                        Toast.makeText(MainActivity.this, "Cannot continue: the context of the mission is not available",
+                        LanguageManager.toast(MainActivity.this, "Cannot continue: the context of the mission is not available",
                                 Toast.LENGTH_SHORT).show();
                     }
                 } else if (engine.isRunning()) {
                     engine.requestPause();
                     updateStatus();
-                    Toast.makeText(MainActivity.this, "Suspension in progress, effective after completion of current steps",
+                    LanguageManager.toast(MainActivity.this, "Suspension in progress, effective after completion of current steps",
                             Toast.LENGTH_SHORT).show();
                 }
             }
@@ -926,7 +926,7 @@ public class MainActivity extends Activity {
         composer.addView(modeIcon, iconSize(dp(27), dp(1)));
 
         input = new EditText(this);
-        input.setHint("Describe your mission....");
+        input.setHint(LanguageManager.tUi(this, "Describe your mission...."));
         input.setHintTextColor(DIM);
         input.setTextColor(TEXT);
         input.setTextSize(13.5f);
@@ -1251,7 +1251,7 @@ public class MainActivity extends Activity {
         chip.addView(vectorIcon("ic_grid", pending > 0 ? Color.rgb(232, 188, 92) : MUTED),
                 iconSize(dp(14), dp(6)));
         TextView text = new TextView(this);
-        text.setText("Mission Centre (MK)" + running + "/" + pending + ")");
+        text.setText(LanguageManager.t(this, "Mission Centre · ") + running + "/" + pending);
         text.setTextColor(pending > 0 ? Color.rgb(232, 188, 92) : MUTED);
         text.setTextSize(12f);
         taskCenterChipText = text;
@@ -1274,7 +1274,7 @@ public class MainActivity extends Activity {
         WorkStore store = WorkSupervisor.get(this).store;
         int running = store.byStatus(WorkStore.RUNNING).size();
         int pending = store.needsAttention().size();
-        taskCenterChipText.setText("Mission Centre (MK)" + running + "/" + pending + ")");
+        taskCenterChipText.setText(LanguageManager.t(this, "Mission Centre · ") + running + "/" + pending);
         taskCenterChipText.setTextColor(pending > 0 ? Color.rgb(232, 188, 92) : MUTED);
     }
 
@@ -1398,7 +1398,7 @@ public class MainActivity extends Activity {
             showChat();
             renderAll();
         } catch (Exception e) {
-            Toast.makeText(this, "Could not close temporary folder: %s" + e.getClass().getSimpleName(),
+            LanguageManager.toast(this, "Could not close temporary folder: %s" + e.getClass().getSimpleName(),
                     Toast.LENGTH_SHORT).show();
         }
     }
@@ -1411,7 +1411,7 @@ public class MainActivity extends Activity {
         }
         if (engine.loadConversationForView(pendingId) == null) {
             android.util.Log.w("InstallWatcher", "pending conversation missing: " + pendingId);
-            Toast.makeText(this, "Last conversation waiting for installation no longer exists", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "Last conversation waiting for installation no longer exists", Toast.LENGTH_SHORT).show();
             return false;
         }
         android.util.Log.i("InstallWatcher", "resume pending conversation: " + pendingId);
@@ -1440,13 +1440,13 @@ public class MainActivity extends Activity {
         if (target == null) {
             Conversation conversation = engine.loadConversationForView(id);
             if (conversation == null) {
-                Toast.makeText(this, "Failed to open dialogue", Toast.LENGTH_SHORT).show();
+                LanguageManager.toast(this, "Failed to open dialogue", Toast.LENGTH_SHORT).show();
                 return;
             }
             target = sessions.open(conversation);
         }
         if (target == null) {
-            Toast.makeText(this, "Failed to open dialogue", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "Failed to open dialogue", Toast.LENGTH_SHORT).show();
             return;
         }
         closeCameraPreview();
@@ -1521,21 +1521,21 @@ public class MainActivity extends Activity {
 
     private void archiveConversation(final Conversation.Summary summary) {
         if (engine.setConversationArchived(summary.id, true)) {
-            Toast.makeText(this, "Archived, available in Archived", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "Archived, available in Archived", Toast.LENGTH_SHORT).show();
             renderAll();
             renderHomeList();
         } else {
-            Toast.makeText(this, "Archive failed", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "Archive failed", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void unarchiveConversation(final Conversation.Summary summary) {
         if (engine.setConversationArchived(summary.id, false)) {
-            Toast.makeText(this, "Canceled Archive", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "Canceled Archive", Toast.LENGTH_SHORT).show();
             renderAll();
             renderHomeList();
         } else {
-            Toast.makeText(this, "Failed to cancel archive", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "Failed to cancel archive", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -1543,7 +1543,7 @@ public class MainActivity extends Activity {
         AgentEngine target = sessions.get(summary.id);
         if ((target != null && target.isRunning())
                 || (engine.isRunning() && summary.id.equals(engine.currentConversationId()))) {
-            Toast.makeText(this, "The dialogue is under way, stop and rename", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "The dialogue is under way, stop and rename", Toast.LENGTH_SHORT).show();
             return;
         }
         AgentKit.input(this, "Rename Dialogue", "Dialogue title", summary.title, "Save",
@@ -1551,7 +1551,7 @@ public class MainActivity extends Activity {
                     @Override
                     public boolean onInput(String value, Dialog dialog) {
                         if (value.isEmpty()) {
-                            Toast.makeText(MainActivity.this, "Please enter the title",
+                            LanguageManager.toast(MainActivity.this, "Please enter the title",
                                     Toast.LENGTH_SHORT).show();
                             return false;
                         }
@@ -1563,7 +1563,7 @@ public class MainActivity extends Activity {
                             renderHomeList();
                             return true;
                         }
-                        Toast.makeText(MainActivity.this, "Rename failed",
+                        LanguageManager.toast(MainActivity.this, "Rename failed",
                                 Toast.LENGTH_SHORT).show();
                         return false;
                     }
@@ -1574,7 +1574,7 @@ public class MainActivity extends Activity {
         AgentEngine target = sessions.get(summary.id);
         if ((target != null && target.isRunning())
                 || (engine.isRunning() && summary.id.equals(engine.currentConversationId()))) {
-            Toast.makeText(this, "The dialogue is under way, stop and then delete.", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "The dialogue is under way, stop and then delete.", Toast.LENGTH_SHORT).show();
             return;
         }
         AgentKit.confirm(this, "Delete the conversation?",
@@ -1589,7 +1589,7 @@ public class MainActivity extends Activity {
                             renderAll();
                             renderHomeList();
                         } else {
-                            Toast.makeText(MainActivity.this, "Failed to delete",
+                            LanguageManager.toast(MainActivity.this, "Failed to delete",
                                     Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -1659,7 +1659,7 @@ public class MainActivity extends Activity {
     }
 
     private void showHomeMenu(View anchor) {
-        showAgentMenu(anchor, "Other Organiser",
+        showAgentMenu(anchor, "More",
                 new String[]{
                         homeGroupByWorkspace ? "Division of groups by job ✓" : "Division of groups by job",
                         homeGroupByWorkspace ? "Group by Date" : "Group by Date ✓",
@@ -1714,7 +1714,7 @@ public class MainActivity extends Activity {
 
     private void importConversationsFromWorkspace() {
         if (engine.isRunning()) {
-            Toast.makeText(this, "Task in progress, stop before import", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "Task in progress, stop before import", Toast.LENGTH_SHORT).show();
             return;
         }
         int imported = 0;
@@ -1749,10 +1749,10 @@ public class MainActivity extends Activity {
             visibleEntryLimit = 80;
             showChat();
             renderAll();
-            Toast.makeText(this, "Imported " + imported + " Dialogue", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, LanguageManager.t(this, "Imported ") + imported + LanguageManager.t(this, " Dialogue"), Toast.LENGTH_SHORT).show();
         } else {
             renderHomeList();
-            Toast.makeText(this, "imports No new dialogue file in directory", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "No new dialogue files in the imports directory", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -1793,10 +1793,10 @@ public class MainActivity extends Activity {
                             public void run() {
                                 if (engine.isRunning()) {
                                     engine.requestPause();
-                                    Toast.makeText(MainActivity.this,
+                                    LanguageManager.toast(MainActivity.this,
                                             "Tasks in progress", Toast.LENGTH_SHORT).show();
                                 } else {
-                                    Toast.makeText(MainActivity.this,
+                                    LanguageManager.toast(MainActivity.this,
                                             "The mission is over.", Toast.LENGTH_SHORT).show();
                                 }
                             }
@@ -1806,10 +1806,10 @@ public class MainActivity extends Activity {
                             public void run() {
                                 if (engine.isRunning()) {
                                     engine.requestStop();
-                                    Toast.makeText(MainActivity.this,
+                                    LanguageManager.toast(MainActivity.this,
                                             "Stopping Tasks", Toast.LENGTH_SHORT).show();
                                 } else {
-                                    Toast.makeText(MainActivity.this,
+                                    LanguageManager.toast(MainActivity.this,
                                             "The mission is over.", Toast.LENGTH_SHORT).show();
                                 }
                             }
@@ -1819,7 +1819,7 @@ public class MainActivity extends Activity {
 
     private void showComposerMenu(View anchor) {
         if (!viewingRunningTask) {
-            Toast.makeText(this, "read-only viewing; actionable after returning ongoing conversations",
+            LanguageManager.toast(this, "read-only viewing; actionable after returning ongoing conversations",
                     Toast.LENGTH_SHORT).show();
             return;
         }
@@ -1897,7 +1897,7 @@ public class MainActivity extends Activity {
 
     private void showModelSheet() {
         if (engine.isRunning()) {
-            Toast.makeText(this, "In the course of the assignment, stop and replace the model", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "In the course of the assignment, stop and replace the model", Toast.LENGTH_SHORT).show();
             return;
         }
         final Conversation conversation = engine.currentConversation();
@@ -1939,7 +1939,7 @@ public class MainActivity extends Activity {
         });
 
         TextView banner = new TextView(this);
-        banner.setText("Only affect current dialogue · " + workspaceLabel(conversation.workspace));
+        banner.setText(LanguageManager.t(this, "Only affect current dialogue · ") + workspaceLabel(conversation.workspace));
         banner.setTextColor(SUCCESS);
         banner.setTextSize(11f);
         banner.setBackground(rounded(Color.rgb(17, 36, 27), 8));
@@ -2054,8 +2054,9 @@ public class MainActivity extends Activity {
                             final List<String> models = prefs.catalogModels(service.baseUrl);
                             TextView meta = new TextView(MainActivity.this);
                             meta.setText(service.displayName() + " · " + service.host()
-                                    + " · " + (models.isEmpty() ? "No model retrieved"
-                                    : models.size() + " Model") + " · Click to refresh");
+                                    + " · " + (models.isEmpty() ? LanguageManager.t(MainActivity.this, "No model retrieved")
+                                    : models.size() + LanguageManager.t(MainActivity.this, " Model"))
+                                    + LanguageManager.t(MainActivity.this, " · Click to refresh"));
                             meta.setTextColor(service.id.equals(currentService)
                                     ? SUCCESS : MUTED);
                             meta.setTextSize(10.5f);
@@ -2096,7 +2097,7 @@ public class MainActivity extends Activity {
                         }
                     }
                     addActionRow(list, "Manage model services...",
-                            prefs.services().size() + " Services · Can keep multiples at the same time",
+                            prefs.services().size() + LanguageManager.t(MainActivity.this, " Services · Can keep multiples at the same time"),
                             new Runnable() {
                                 @Override
                                 public void run() {
@@ -2245,7 +2246,7 @@ public class MainActivity extends Activity {
         nameView.setEllipsize(TextUtils.TruncateAt.END);
         info.addView(nameView, new LinearLayout.LayoutParams(MATCH, WRAP));
         TextView subView = new TextView(this);
-        subView.setText(profile.summary() + " · " + service.displayName());
+        subView.setText(localizeModelProfile(profile.summary()) + " · " + service.displayName());
         subView.setTextColor(DIM);
         subView.setTextSize(9.5f);
         subView.setPadding(0, dp(2), 0, 0);
@@ -2261,7 +2262,7 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 dialog.dismiss();
                 applyServiceModel(service, model);
-                Toast.makeText(MainActivity.this,
+                LanguageManager.toast(MainActivity.this,
                         "Switched to " + model + " · " + service.displayName(),
                         Toast.LENGTH_SHORT).show();
             }
@@ -2307,11 +2308,11 @@ public class MainActivity extends Activity {
         final String key = service.apiKey == null || service.apiKey.trim().isEmpty()
                 ? prefs.apiKey() : service.apiKey.trim();
         if (key.isEmpty()) {
-            Toast.makeText(this, "Please configure in Model Service API Key",
+            LanguageManager.toast(this, "Please configure in Model Service API Key",
                     Toast.LENGTH_SHORT).show();
             return;
         }
-        Toast.makeText(this, "Fetching " + service.displayName() + " . The list of models...",
+        LanguageManager.toast(this, "Fetching " + service.displayName() + " . The list of models...",
                 Toast.LENGTH_SHORT).show();
         new Thread(new Runnable() {
             @Override
@@ -2325,13 +2326,14 @@ public class MainActivity extends Activity {
                             return;
                         }
                         if (!result.ok()) {
-                            Toast.makeText(MainActivity.this, result.error,
+                            LanguageManager.toast(MainActivity.this, result.error,
                                     Toast.LENGTH_LONG).show();
                             return;
                         }
                         prefs.saveCatalog(service.baseUrl, result.models);
-                        Toast.makeText(MainActivity.this,
-                                "Retrieved " + result.models.size() + " Model",
+                        LanguageManager.toast(MainActivity.this,
+                                LanguageManager.t(MainActivity.this, "Retrieved ") + result.models.size()
+                                        + LanguageManager.t(MainActivity.this, " Model"),
                                 Toast.LENGTH_SHORT).show();
                         if (onDone != null) {
                             onDone.run();
@@ -2397,7 +2399,7 @@ public class MainActivity extends Activity {
                 renderAll();
                 updateStatus();
                 preloadLocalModel();
-                Toast.makeText(MainActivity.this,
+                LanguageManager.toast(MainActivity.this,
                         "Current dialogue uses local models:" + file.getName(),
                         Toast.LENGTH_SHORT).show();
             }
@@ -2415,7 +2417,7 @@ public class MainActivity extends Activity {
                     @Override
                     public boolean onInput(String value, Dialog dialog) {
                         if (value.isEmpty()) {
-                            Toast.makeText(MainActivity.this, "Please enter the model name",
+                            LanguageManager.toast(MainActivity.this, "Please enter the model name",
                                     Toast.LENGTH_SHORT).show();
                             return false;
                         }
@@ -2436,12 +2438,12 @@ public class MainActivity extends Activity {
             service = prefs.service(prefs.activeServiceId());
         }
         if (service == null) {
-            Toast.makeText(this, "Please add a service to the Model Service.",
+            LanguageManager.toast(this, "Please add a service to the Model Service.",
                     Toast.LENGTH_SHORT).show();
             return;
         }
         applyServiceModel(service, id);
-        Toast.makeText(this, "Model has been converted to " + id, Toast.LENGTH_SHORT).show();
+        LanguageManager.toast(this, "Model has been converted to " + id, Toast.LENGTH_SHORT).show();
     }
 
     private GradientDrawable roundedTop(int color, float radiusDp) {
@@ -2467,7 +2469,7 @@ public class MainActivity extends Activity {
 
         if (title != null && !title.isEmpty()) {
             TextView header = new TextView(this);
-            header.setText(title);
+            header.setText(LanguageManager.tUi(this, title));
             header.setTextColor(DIM);
             header.setTextSize(10f);
             header.setSingleLine(true);
@@ -2488,7 +2490,7 @@ public class MainActivity extends Activity {
             ImageView icon = vectorIcon(icons[i], colors[i]);
             row.addView(icon, iconSize(dp(19), dp(10)));
             TextView label = new TextView(this);
-            label.setText(labels[i]);
+            label.setText(LanguageManager.tUi(this, labels[i]));
             label.setTextColor(colors[i]);
             label.setTextSize(13f);
             row.addView(label, new LinearLayout.LayoutParams(0, WRAP, 1f));
@@ -2545,7 +2547,7 @@ public class MainActivity extends Activity {
 
     private String workspaceLabel(String path) {
         String value = path == null ? "" : path.trim();
-        return value.isEmpty() || "/".equals(value) ? "Root Directory" : value;
+        return value.isEmpty() || "/".equals(value) ? LanguageManager.t(this, "Root Directory") : value;
     }
 
     private void scheduleRender() {
@@ -2665,7 +2667,7 @@ public class MainActivity extends Activity {
 
     private void addLoadEarlierRow(int hidden) {
         TextView more = new TextView(this);
-        more.setText("Check for earlier. " + hidden + " Article");
+        more.setText(LanguageManager.t(this, "Check for earlier. ") + hidden + LanguageManager.t(this, " Article"));
         more.setTextColor(MUTED);
         more.setTextSize(11f);
         more.setGravity(Gravity.CENTER);
@@ -2870,7 +2872,7 @@ public class MainActivity extends Activity {
         row.addView(vectorIcon("ic_sparkle", Color.rgb(232, 188, 92)),
                 iconSize(dp(15), dp(9)));
         TextView text = new TextView(this);
-        text.setText("Thinking · " + preview);
+        text.setText(LanguageManager.t(this, "Thinking · ") + preview);
         text.setTextColor(MUTED);
         text.setTextSize(11.5f);
         text.setSingleLine(true);
@@ -3365,7 +3367,7 @@ public class MainActivity extends Activity {
                     settingsModeValue.setText(modeLabel(mode));
                 }
                 updateStatus();
-                Toast.makeText(MainActivity.this, "Run mode:" + modeLabel(mode),
+                LanguageManager.toast(MainActivity.this, "Run mode:" + modeLabel(mode),
                         Toast.LENGTH_SHORT).show();
                 dialog.dismiss();
             }
@@ -3382,7 +3384,7 @@ public class MainActivity extends Activity {
     private void notifyBackgroundApproval(final String tool) {
         runOnUiThread(new Runnable() {
             @Override public void run() {
-                Toast.makeText(getApplicationContext(),
+                LanguageManager.toast(getApplicationContext(),
                         "The following is a list of the most recent events in the world:" + tool, Toast.LENGTH_SHORT).show();
             }
         });
@@ -3404,7 +3406,7 @@ public class MainActivity extends Activity {
                         notifyBackgroundApproval(tool);
                         return AgentEngine.APPROVAL_ONCE;
                     }
-                    Toast.makeText(getApplicationContext(),
+                    LanguageManager.toast(getApplicationContext(),
                             "Agent 'and need your permission.'" + tool + "', Skipped this operation; back App We can confirm it later.",
                             Toast.LENGTH_LONG).show();
                     return AgentEngine.APPROVAL_DENY;
@@ -3434,7 +3436,7 @@ public class MainActivity extends Activity {
                             if (bgAllowed) {
                                 notifyBackgroundApproval(tool);
                             } else {
-                                Toast.makeText(getApplicationContext(),
+                                LanguageManager.toast(getApplicationContext(),
                                         "Agent 'need authorization.'" + tool + "', Skipped this operation (%1)App Not at the reception desk)",
                                         Toast.LENGTH_LONG).show();
                             }
@@ -3961,7 +3963,7 @@ public class MainActivity extends Activity {
     private void addIntentRow(long key, String intent) {
         TextView row = new TextView(this);
         String shown = intent.length() > 120 ? intent.substring(0, 120) + "..." : intent;
-        row.setText("Think. · " + shown);
+        row.setText(LanguageManager.t(this, "Think. · ") + shown);
         row.setTextColor(MUTED);
         row.setTextSize(11.5f);
         row.setPadding(dp(31), 0, dp(8), dp(6));
@@ -4355,7 +4357,7 @@ public class MainActivity extends Activity {
             }
 
             final EditText free = new EditText(MainActivity.this);
-            free.setHint("Or you can just write your answer.");
+            free.setHint(LanguageManager.tUi(MainActivity.this, "Or you can just write your answer."));
             free.setText(custom.get(page));
             free.setTextColor(TEXT);
             free.setHintTextColor(DIM);
@@ -4402,7 +4404,7 @@ public class MainActivity extends Activity {
                         .append("\n   Answer:").append(answer);
             }
             if (!answeredFully(answers)) {
-                Toast.makeText(MainActivity.this, "There's still no answer.",
+                LanguageManager.toast(MainActivity.this, "There's still no answer.",
                         Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -4415,13 +4417,13 @@ public class MainActivity extends Activity {
             for (String answer : answers) {
                 if (answer != null && "Stop Task".equals(answer.trim())) {
                     engine.requestStop();
-                    Toast.makeText(MainActivity.this, "Other Organiser",
+                    LanguageManager.toast(MainActivity.this, "Other Organiser",
                             Toast.LENGTH_SHORT).show();
                     return;
                 }
             }
             if (!engine.startTask(composed.toString())) {
-                Toast.makeText(MainActivity.this, "Agent Under implementation. Try again later.",
+                LanguageManager.toast(MainActivity.this, "Agent Under implementation. Try again later.",
                         Toast.LENGTH_SHORT).show();
             }
         }
@@ -4471,7 +4473,7 @@ public class MainActivity extends Activity {
 
     private void onSendOrStop() {
         if (!viewingRunningTask) {
-            Toast.makeText(this, "read-only viewing; actionable after returning ongoing conversations",
+            LanguageManager.toast(this, "read-only viewing; actionable after returning ongoing conversations",
                     Toast.LENGTH_SHORT).show();
             return;
         }
@@ -4486,7 +4488,7 @@ public class MainActivity extends Activity {
                 if ("/status".equalsIgnoreCase(text)) {
                     handleSlashCommand(text);
                 } else {
-                    Toast.makeText(this, "A slash command cannot be performed while the task is running;"
+                    LanguageManager.toast(this, "A slash command cannot be performed while the task is running;"
                             + "You can enter a plug-in directly or stop the task first.", Toast.LENGTH_SHORT).show();
                 }
                 return;
@@ -4498,15 +4500,15 @@ public class MainActivity extends Activity {
                 && pendingImages.isEmpty() && pendingFiles.isEmpty()) {
             if (engine.resumeTask()) {
                 renderAll();
-                Toast.makeText(this, "Keep on with your mission.", Toast.LENGTH_SHORT).show();
+                LanguageManager.toast(this, "Keep on with your mission.", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "Cannot continue: the context of the mission is not available",
+                LanguageManager.toast(this, "Cannot continue: the context of the mission is not available",
                         Toast.LENGTH_SHORT).show();
             }
             return;
         }
         if (preprocessing) {
-            Toast.makeText(this, "Local preprocession, please wait", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "Local preprocession, please wait", Toast.LENGTH_SHORT).show();
             return;
         }
         if (text.isEmpty()) {
@@ -4532,7 +4534,7 @@ public class MainActivity extends Activity {
             return;
         }
         if (!pendingImages.isEmpty() || !pendingFiles.isEmpty()) {
-            Toast.makeText(this, "Could not add attachments to the assignment, please wait until after the assignment has ended",
+            LanguageManager.toast(this, "Could not add attachments to the assignment, please wait until after the assignment has ended",
                     Toast.LENGTH_SHORT).show();
             return;
         }
@@ -4552,7 +4554,7 @@ public class MainActivity extends Activity {
             input.setText("");
             hideKeyboard();
             renderAll();
-            Toast.makeText(this, engine.isPaused()
+            LanguageManager.toast(this, engine.isPaused()
                             ? "We've signed up for orders. We're continuing...." : "Interrupted, effective in the next round.",
                     Toast.LENGTH_SHORT).show();
         } else {
@@ -4562,16 +4564,16 @@ public class MainActivity extends Activity {
 
     private void submitUserText(final String raw, final boolean fromCommand) {
         if (!viewingRunningTask) {
-            Toast.makeText(this, "read-only viewing; actionable after returning ongoing conversations",
+            LanguageManager.toast(this, "read-only viewing; actionable after returning ongoing conversations",
                     Toast.LENGTH_SHORT).show();
             return;
         }
         if (engine.isRunning()) {
-            Toast.makeText(this, "Agent Under implementation. Please wait.", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "Agent Under implementation. Please wait.", Toast.LENGTH_SHORT).show();
             return;
         }
         if (preprocessing) {
-            Toast.makeText(this, "Local preprocession, please wait", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "Local preprocession, please wait", Toast.LENGTH_SHORT).show();
             return;
         }
         final String text = raw == null ? "" : raw.trim();
@@ -4650,7 +4652,7 @@ public class MainActivity extends Activity {
                 preprocessWaitDialog = null;
                 setPreprocessBusy(false);
                 if (result.error != null) {
-                    Toast.makeText(MainActivity.this,
+                    LanguageManager.toast(MainActivity.this,
                             "Local models are not available:" + result.error + "; Continue as per the rules",
                             Toast.LENGTH_LONG).show();
                     startTaskDirect(original);
@@ -4736,9 +4738,12 @@ public class MainActivity extends Activity {
         LinearLayout content = AgentKit.column(this);
         content.setPadding(dp(18), 0, dp(18), 0);
         TextView message = new TextView(this);
-        message.setText("Continuing requests will skip local security rules and be processed by cloud-based models, possibly through automated access to real operations such as reading, sending and so on.\n\n"
-                + "Agent I still won't get it. root, Installation of a confirmation or lock screen around the system; the key, password, cell phone number, etc. in the request will still automatically dissensitize.\n\n"
-                + "Please confirm that this is your own equipment, your own account number and understand the possible consequences.");
+        message.setText(LanguageManager.t(this,
+                "Continuing requests will skip local security rules and be processed by cloud-based models, possibly performing real actions such as reading messages or sending them.") + "\n\n"
+                + LanguageManager.t(this,
+                "The agent still cannot obtain root, bypass system install confirmation, or bypass the lock screen; keys, passwords, and phone numbers in the request are still redacted automatically.") + "\n\n"
+                + LanguageManager.t(this,
+                "Please confirm that this is your own device and your own account, and that you understand the possible consequences."));
         message.setTextColor(TEXT);
         message.setTextSize(13f);
         message.setLineSpacing(dp(3), 1f);
@@ -4942,18 +4947,18 @@ public class MainActivity extends Activity {
             return;
         }
         if (ai.selectedFile() == null) {
-            Toast.makeText(this, "Please download or import on the local model page first GGUF",
+            LanguageManager.toast(this, "Please download or import on the local model page first GGUF",
                     Toast.LENGTH_LONG).show();
             return;
         }
-        Toast.makeText(this, "Loading local models in the background...", Toast.LENGTH_SHORT).show();
+        LanguageManager.toast(this, "Loading local models in the background...", Toast.LENGTH_SHORT).show();
         ai.loadSelected(new LocalAi.LoadCallback() {
             @Override
             public void onDone(boolean ok, String info, String error) {
                 if (ok) {
                     ai.warmInBackground();
                 }
-                Toast.makeText(MainActivity.this,
+                LanguageManager.toast(MainActivity.this,
                         ok ? "Local model is ready" : "Local model load failed:" + error,
                         Toast.LENGTH_LONG).show();
             }
@@ -4995,7 +5000,7 @@ public class MainActivity extends Activity {
             preprocessWaitDialog = null;
         }
         setPreprocessBusy(false);
-        Toast.makeText(this, "Local preprocession timeout has been restored; can be sent back directly",
+        LanguageManager.toast(this, "Local preprocession timeout has been restored; can be sent back directly",
                 Toast.LENGTH_LONG).show();
     }
 
@@ -5013,14 +5018,14 @@ public class MainActivity extends Activity {
                     : "Please look at the picture I've attached and show what you see.";
         }
         if (!viewingRunningTask) {
-            Toast.makeText(this, "read-only viewing; actionable after returning ongoing conversations",
+            LanguageManager.toast(this, "read-only viewing; actionable after returning ongoing conversations",
                     Toast.LENGTH_SHORT).show();
             return false;
         }
         feedAtBottom = true;
         if (engine.isRunning()) {
             if (!attachments.isEmpty() || !files.isEmpty()) {
-                Toast.makeText(this, "Could not add attachments to the assignment, please wait until after the assignment has ended",
+                LanguageManager.toast(this, "Could not add attachments to the assignment, please wait until after the assignment has ended",
                         Toast.LENGTH_SHORT).show();
                 return false;
             }
@@ -5028,23 +5033,23 @@ public class MainActivity extends Activity {
                 input.setText("");
                 hideKeyboard();
                 renderAll();
-                Toast.makeText(this, "Interrupted, effective in the next round.",
+                LanguageManager.toast(this, "Interrupted, effective in the next round.",
                         Toast.LENGTH_SHORT).show();
                 return true;
             }
-            Toast.makeText(this, "Mandate is closed and being sent as new",
+            LanguageManager.toast(this, "Mandate is closed and being sent as new",
                     Toast.LENGTH_SHORT).show();
         }
         Conversation activeConversation = engine.currentConversation();
         String activeKey = activeConversation == null ? prefs.apiKey()
                 : prefs.apiKeyFor(activeConversation.modelService, activeConversation.baseUrl);
         if (engine.requiresApiKey() && activeKey.isEmpty()) {
-            Toast.makeText(this, "Current model service not configured API Key", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "Current model service not configured API Key", Toast.LENGTH_SHORT).show();
             showModelService();
             return false;
         }
         if (engine.isLocalModel() && sessions.otherRunning(engine.currentConversationId())) {
-            Toast.makeText(this, "Local models can only run one task at a time; please wait for other conversations to be completed or for the cloud model to be used",
+            LanguageManager.toast(this, "Local models can only run one task at a time; please wait for other conversations to be completed or for the cloud model to be used",
                     Toast.LENGTH_LONG).show();
             return false;
         }
@@ -5058,7 +5063,7 @@ public class MainActivity extends Activity {
             renderAll();
             return true;
         }
-        Toast.makeText(this, "Agent Under implementation. Please wait.", Toast.LENGTH_SHORT).show();
+        LanguageManager.toast(this, "Agent Under implementation. Please wait.", Toast.LENGTH_SHORT).show();
         return false;
     }
 
@@ -5079,7 +5084,7 @@ public class MainActivity extends Activity {
         } else {
             message = "The 'Break the ceiling' has been closed: restore the default protection of the rotation, budget and window.";
         }
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        LanguageManager.toast(this, message, Toast.LENGTH_LONG).show();
         renderAll();
     }
 
@@ -5098,7 +5103,7 @@ public class MainActivity extends Activity {
             return true;
         }
         if ("export".equals(command)) {
-            Toast.makeText(this, engine.exportConversationJson(), Toast.LENGTH_LONG).show();
+            LanguageManager.toast(this, engine.exportConversationJson(), Toast.LENGTH_LONG).show();
             return true;
         }
         if ("overlimit".equals(command)) {
@@ -5106,7 +5111,7 @@ public class MainActivity extends Activity {
             return true;
         }
         if ("compact".equals(command)) {
-            Toast.makeText(this, engine.compactNow(), Toast.LENGTH_LONG).show();
+            LanguageManager.toast(this, engine.compactNow(), Toast.LENGTH_LONG).show();
             renderAll();
             return true;
         }
@@ -5116,7 +5121,7 @@ public class MainActivity extends Activity {
         }
         if ("init".equals(command)) {
             String result = engine.initProjectRules();
-            Toast.makeText(this, result, Toast.LENGTH_LONG).show();
+            LanguageManager.toast(this, result, Toast.LENGTH_LONG).show();
             if (result.startsWith("Created")) {
                 openEditor("AGENTS.md", "");
             }
@@ -5127,7 +5132,7 @@ public class MainActivity extends Activity {
                 input.setText("/plan ");
                 input.setSelection(input.getText().length());
                 input.requestFocus();
-                Toast.makeText(this, "Yes. /plan Additional tasks later", Toast.LENGTH_SHORT).show();
+                LanguageManager.toast(this, "Yes. /plan Additional tasks later", Toast.LENGTH_SHORT).show();
                 return false;
             }
             startTaskFromCommand("Call first. update_plan Development 3-8 The first step is to be verified."
@@ -5172,17 +5177,17 @@ public class MainActivity extends Activity {
         }
         if ("status".equals(command)) {
             AgentEngine.ContextInfo info = engine.contextInfo();
-            Toast.makeText(this, "Model " + (engine.currentConversation() == null ? "-"
+            LanguageManager.toast(this, "Model " + (engine.currentConversation() == null ? "-"
                             : engine.currentConversation().model)
                             + " · Mode " + modeLabel(engine.approvalMode())
-                            + " · Context " + info.percent + "%(About " + info.usedTokens
-                            + "/" + info.budgetTokens + " tokens)"
-                            + " · Authorized Tools " + engine.alwaysAllowedTools().size() + " individual",
+                            + LanguageManager.t(this, " · Context ") + info.percent + "%(About " + info.usedTokens
+                            + "/" + info.budgetTokens + LanguageManager.t(this, " tokens)")
+                            + " · Authorized Tools " + engine.alwaysAllowedTools().size() + LanguageManager.t(this, " individual"),
                     Toast.LENGTH_LONG).show();
             return true;
         }
         showSlashCommands();
-        Toast.makeText(this, "Unknown command /" + command, Toast.LENGTH_SHORT).show();
+        LanguageManager.toast(this, "Unknown command /" + command, Toast.LENGTH_SHORT).show();
         return true;
     }
 
@@ -5271,14 +5276,14 @@ public class MainActivity extends Activity {
                 statusText.setOnClickListener(null);
                 AgentEngine.ContextInfo context = engine.contextInfo();
                 String status = workspaceLabel(engine.currentWorkspacePath())
-                        + " · Context " + context.percent + "%";
+                        + LanguageManager.t(this, " · Context ") + context.percent + "%";
                 if (context.droppedMessages > 0) {
-                    status += " · Cropd";
+                    status += LanguageManager.t(this, " · Trimmed");
                 }
                 if (engine.isRunning()) {
-                    status += " · Under implementation";
+                    status += LanguageManager.t(this, " · Running");
                 } else if (engine.isPaused()) {
-                    status += " · Paused";
+                    status += LanguageManager.t(this, " · Paused");
                 }
                 statusText.setText(status);
                 statusText.setTextColor(context.percent >= 85 ? ERROR : MUTED);
@@ -5372,22 +5377,22 @@ public class MainActivity extends Activity {
             input.setEnabled(editable);
             input.setAlpha(editable ? 1f : 0.55f);
             if (preprocessing) {
-                input.setHint("Local preprocession...");
+                input.setHint(LanguageManager.tUi(this, "Local preprocession..."));
             } else if (viewingOther) {
-                input.setHint("Read-only view: actionable after returning to ongoing dialogue");
+                input.setHint(LanguageManager.tUi(this, "Read-only view: actionable after returning to ongoing dialogue"));
             } else if (running) {
-                input.setHint("Intersect: The task continues and the content will be added to the next round...");
+                input.setHint(LanguageManager.tUi(this, "Intersect: The task continues and the content will be added to the next round..."));
             } else if (paused) {
-                input.setHint("Job suspended: enter new command to continue, or dot ▶ Go on....");
+                input.setHint(LanguageManager.tUi(this, "Job suspended: enter new command to continue, or dot ▶ Go on...."));
             } else {
-                input.setHint("Describe your mission....");
+                input.setHint(LanguageManager.tUi(this, "Describe your mission...."));
             }
         }
     }
 
     private void showArtifacts(final String relativePath) {
         if (!viewingRunningTask) {
-            Toast.makeText(this, "Reading-only; browsing documents after returning to ongoing conversations",
+            LanguageManager.toast(this, "Reading-only; browsing documents after returning to ongoing conversations",
                     Toast.LENGTH_SHORT).show();
             return;
         }
@@ -5395,14 +5400,14 @@ public class MainActivity extends Activity {
         try {
             directory = workspace.resolve(relativePath);
         } catch (Exception e) {
-            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, e.getMessage(), Toast.LENGTH_SHORT).show();
             return;
         }
         if (!directory.isDirectory()) {
             if (directory.isFile()) {
                 openEditor(relativePath, engine.currentWorkspacePath());
             } else {
-                Toast.makeText(this, "The directory is not available", Toast.LENGTH_SHORT).show();
+                LanguageManager.toast(this, "The directory is not available", Toast.LENGTH_SHORT).show();
             }
             return;
         }
@@ -5577,7 +5582,7 @@ public class MainActivity extends Activity {
                                 if (checked) {
                                     DebugBridge.prepare(MainActivity.this);
                                     BridgeAutoService.start(MainActivity.this);
-                                    Toast.makeText(MainActivity.this,
+                                    LanguageManager.toast(MainActivity.this,
                                             "Debugging the data bridge has been opened:/sdcard/MobileAgent/agent-bridge/debug/state.json",
                                             Toast.LENGTH_LONG).show();
                                 } else {
@@ -5617,7 +5622,7 @@ public class MainActivity extends Activity {
         content.addView(AgentKit.hint(this,
                         "Autosave is open: write immediately after each change set, without having to save manually."),
                 new LinearLayout.LayoutParams(MATCH, WRAP));
-        final TextView detail = AgentKit.hint(this, LocalConfig.detailText());
+        final TextView detail = AgentKit.hint(this, LocalConfig.detailText(this));
         detail.setTextIsSelectable(true);
         content.addView(detail, new LinearLayout.LayoutParams(MATCH, WRAP));
 
@@ -5628,9 +5633,11 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 int restored = LocalConfig.restoreMissing();
-                detail.setText(LocalConfig.detailText());
-                Toast.makeText(MainActivity.this,
-                        restored > 0 ? "Complete from File " + restored + " Item" : "No missing settings",
+                detail.setText(LocalConfig.detailText(MainActivity.this));
+                LanguageManager.toast(MainActivity.this,
+                        restored > 0 ? LanguageManager.t(MainActivity.this, "Complete from File ") + restored
+                                + LanguageManager.t(MainActivity.this, " Item")
+                                : LanguageManager.t(MainActivity.this, "No missing settings"),
                         Toast.LENGTH_SHORT).show();
             }
         });
@@ -5727,7 +5734,7 @@ public class MainActivity extends Activity {
         badgeParams.setMargins(dp(8), 0, 0, 0);
         nameRow.addView(badge, badgeParams);
         TextView accountSub = new TextView(this);
-        accountSub.setText("Version " + versionName() + " · " + workspaceLabel(engine.currentWorkspacePath()));
+        accountSub.setText(LanguageManager.t(this, "Version ") + versionName() + " · " + workspaceLabel(engine.currentWorkspacePath()));
         accountSub.setTextColor(MUTED);
         accountSub.setTextSize(10.5f);
         accountSub.setPadding(0, dp(4), 0, 0);
@@ -5800,7 +5807,7 @@ public class MainActivity extends Activity {
                         prefs.setAutoResumeInterrupted(!prefs.autoResumeInterrupted());
                         boolean on = prefs.autoResumeInterrupted();
                         autoResumeValue[0].setText(on ? "Open" : "Closed");
-                        Toast.makeText(MainActivity.this,
+                        LanguageManager.toast(MainActivity.this,
                                 on ? "After break, try to automatically restore the uncompleted tasks"
                                         : "Show pause after break. Continue manually.",
                                 Toast.LENGTH_SHORT).show();
@@ -5816,7 +5823,7 @@ public class MainActivity extends Activity {
                         prefs.setLiteHarness(!prefs.liteHarness());
                         boolean on = prefs.liteHarness();
                         liteValue[0].setText(on ? "Open" : "Closed");
-                        Toast.makeText(MainActivity.this,
+                        LanguageManager.toast(MainActivity.this,
                                 on ? "Lite: 12k Context / 12 Wheel / Core tool, autoinjection and reset closed"
                                         : "Complete mode: restoration of memory/Skills/AutoResearch/Rewind and Extension",
                                 Toast.LENGTH_SHORT).show();
@@ -5832,7 +5839,7 @@ public class MainActivity extends Activity {
                         prefs.setAutoToolSelection(!prefs.autoToolSelection());
                         boolean on = prefs.autoToolSelection();
                         autoToolsValue[0].setText(on ? "Open" : "Closed");
-                        Toast.makeText(MainActivity.this,
+                        LanguageManager.toast(MainActivity.this,
                                 on ? "Sending related tools only by task, less token"
                                         : "Sending all the tools every time. Best compatible, but more expensive. token",
                                 Toast.LENGTH_SHORT).show();
@@ -5858,7 +5865,7 @@ public class MainActivity extends Activity {
                         prefs.setSmartContextEnabled(!prefs.smartContextEnabled());
                         boolean on = prefs.smartContextEnabled();
                         smartValue[0].setText(on ? "Open" : "Closed");
-                        Toast.makeText(MainActivity.this,
+                        LanguageManager.toast(MainActivity.this,
                                 on ? "The program automatically retrieves the relevant code clips at the beginning"
                                         : "Turn off auto-search, switch to repo_search Manually Search",
                                 Toast.LENGTH_SHORT).show();
@@ -5873,7 +5880,7 @@ public class MainActivity extends Activity {
                         if (settingsWebValue != null) {
                             settingsWebValue.setText(on ? "Open" : "Closed");
                         }
-                        Toast.makeText(MainActivity.this,
+                        LanguageManager.toast(MainActivity.this,
                                 on ? "Network Search/Capture is on." : "Network Search/Fetching closed;specified web pages/Search missions are still automatically authorized.",
                                 Toast.LENGTH_SHORT).show();
                     }
@@ -5887,7 +5894,7 @@ public class MainActivity extends Activity {
                         prefs.setAllowHooks(!prefs.allowHooks());
                         boolean on = prefs.allowHooks();
                         hookValue[0].setText(on ? "Open" : "Closed");
-                        Toast.makeText(MainActivity.this,
+                        LanguageManager.toast(MainActivity.this,
                                 on ? "Hooks Enabled: Configure .agent/hooks.json (a) After entry into force;Hook Here. App Authority execution shell"
                                         : "Hooks Closed",
                                 Toast.LENGTH_LONG).show();
@@ -5901,7 +5908,7 @@ public class MainActivity extends Activity {
                     }
                 }, true);
         addSettingsRow(harnessCard, "ic_grid", "Internal Tools",
-                ToolDefs.tools().length() + " individual", new View.OnClickListener() {
+                ToolDefs.tools().length() + LanguageManager.t(this, " individual"), new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         showCapabilities();
@@ -5925,7 +5932,7 @@ public class MainActivity extends Activity {
                     }
                 });
         addSettingsRow(abilityCard, "ic_archive", "Automation",
-                AutomationStore.get(this).tasks().size() + " Tasks",
+                AutomationStore.get(this).tasks().size() + LanguageManager.t(this, " Tasks"),
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -5963,7 +5970,7 @@ public class MainActivity extends Activity {
 
         addSettingsSection(content, "Configure");
         LinearLayout configCard = settingsCard(content);
-        addSettingsRow(configCard, "ic_file", "Local Profile", LocalConfig.savedLabel(),
+        addSettingsRow(configCard, "ic_file", "Local Profile", LocalConfig.savedLabel(this),
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -6081,7 +6088,7 @@ public class MainActivity extends Activity {
                                             @Override
                                             public void run() {
                                                 progress.dismiss();
-                                                Toast.makeText(MainActivity.this, message,
+                                                LanguageManager.toast(MainActivity.this, message,
                                                         Toast.LENGTH_LONG).show();
                                                 if (ok) {
                                                     recreate();
@@ -6134,12 +6141,12 @@ public class MainActivity extends Activity {
         ImageView icon = vectorIcon(iconName, MUTED);
         row.addView(icon, iconSize(dp(19), dp(12)));
         TextView labelView = new TextView(this);
-        labelView.setText(LanguageManager.t(this, label));
+        labelView.setText(LanguageManager.tUi(this, label));
         labelView.setTextColor(TEXT);
         labelView.setTextSize(13.5f);
         row.addView(labelView, new LinearLayout.LayoutParams(0, WRAP, 1f));
         TextView valueView = new TextView(this);
-        valueView.setText(LanguageManager.t(this, value));
+        valueView.setText(LanguageManager.tUi(this, value));
         valueView.setTextColor(MUTED);
         valueView.setTextSize(10.5f);
         valueView.setSingleLine(true);
@@ -6186,7 +6193,7 @@ public class MainActivity extends Activity {
                             }
                         } catch (Exception ignored) {
                         }
-                        Toast.makeText(MainActivity.this, "Cleared " + deleted + " Temporary document",
+                        LanguageManager.toast(MainActivity.this, "Cleared " + deleted + " Temporary document",
                                 Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -6216,7 +6223,7 @@ public class MainActivity extends Activity {
             }
             openEditor(HookManager.CONFIG_PATH, engine.currentWorkspacePath());
         } catch (Exception e) {
-            Toast.makeText(this, "Could not open Hooks Configure:"
+            LanguageManager.toast(this, "Could not open Hooks Configure:"
                     + (e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage()),
                     Toast.LENGTH_LONG).show();
         }
@@ -6272,7 +6279,7 @@ public class MainActivity extends Activity {
                 keyInput.setText("");
                 prefs.saveApiKey("");
                 updateStatus();
-                Toast.makeText(MainActivity.this, "API Key Cleared",
+                LanguageManager.toast(MainActivity.this, "API Key Cleared",
                         Toast.LENGTH_SHORT).show();
             }
         });
@@ -6282,7 +6289,7 @@ public class MainActivity extends Activity {
                 prefs.saveApiKey(keyInput.getText().toString().trim());
                 dialog.dismiss();
                 updateStatus();
-                Toast.makeText(MainActivity.this, "API Key Saved",
+                LanguageManager.toast(MainActivity.this, "API Key Saved",
                         Toast.LENGTH_SHORT).show();
             }
         });
@@ -6309,20 +6316,31 @@ public class MainActivity extends Activity {
         if (conversation == null) {
             return "-";
         }
-        return prefs.modelProfile(conversation.baseUrl, conversation.model).shortSummary();
+        return localizeModelProfile(prefs.modelProfile(conversation.baseUrl, conversation.model).shortSummary());
+    }
+
+    private String localizeModelProfile(String text) {
+        if (text == null) {
+            return "";
+        }
+        return text.replace(" Context · Output ", LanguageManager.t(this, " Context · Output "))
+                .replace(" · No tool", LanguageManager.t(this, " · No tool"))
+                .replace(" · Tools", LanguageManager.t(this, " · Tools"))
+                .replace(" · Visual", LanguageManager.t(this, " · Visual"))
+                .replace(" · Think.", LanguageManager.t(this, " · Think."));
     }
 
     private String modelServicesSummary() {
         List<ModelService> services = prefs.services();
         ModelService active = prefs.service(prefs.activeServiceId());
-        return services.size() + " Services"
+        return services.size() + LanguageManager.t(this, " Services")
                 + (active == null ? "" : " · " + active.displayName());
     }
 
     /** Gateway list: multiple services can coexist, each keeping its own key and models. */
     private void showModelService() {
         if (engine.isRunning()) {
-            Toast.makeText(this, "In the course of the task, stop and modify the model service", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "In the course of the task, stop and modify the model service", Toast.LENGTH_SHORT).show();
             return;
         }
         LinearLayout content = AgentKit.column(this);
@@ -6339,11 +6357,11 @@ public class MainActivity extends Activity {
         } else {
             String activeId = prefs.activeServiceId();
             for (final ModelService service : services) {
-                String prefix = service.id.equals(activeId) ? "Current · " : "";
+                String prefix = service.id.equals(activeId) ? LanguageManager.t(this, "Current · ") : "";
                 addActionRow(content, service.displayName(), prefix + service.host()
                                 + " · " + ModelProtocols.shortLabel(service.protocol)
                                 + " · " + service.keyState() + " · "
-                                + prefs.catalogModels(service.baseUrl).size() + " Model",
+                                + prefs.catalogModels(service.baseUrl).size() + LanguageManager.t(this, " Model"),
                         new Runnable() {
                             @Override
                             public void run() {
@@ -6373,7 +6391,7 @@ public class MainActivity extends Activity {
 
     private void showModelServiceEditor(final String serviceId) {
         if (engine.isRunning()) {
-            Toast.makeText(this, "In the course of the task, stop and modify the model service", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "In the course of the task, stop and modify the model service", Toast.LENGTH_SHORT).show();
             return;
         }
         final ModelService existing = prefs.service(serviceId);
@@ -6537,7 +6555,7 @@ public class MainActivity extends Activity {
                 updateServiceStatus(status, service);
                 renderModels.run();
                 markSettingsDirty();
-                Toast.makeText(MainActivity.this, "Model service saved",
+                LanguageManager.toast(MainActivity.this, "Model service saved",
                         Toast.LENGTH_SHORT).show();
             }
         });
@@ -6591,7 +6609,7 @@ public class MainActivity extends Activity {
         try {
             base = ModelCatalog.normalizeBase(baseInput.getText().toString());
         } catch (IllegalArgumentException e) {
-            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, e.getMessage(), Toast.LENGTH_SHORT).show();
             return false;
         }
         service.name = nameInput.getText().toString().trim();
@@ -6647,7 +6665,7 @@ public class MainActivity extends Activity {
                         prefs.saveCatalog(service.baseUrl, result.models);
                         updateServiceStatus(status, service);
                         status.setTextColor(SUCCESS);
-                        status.setText("Retrieved " + result.models.size() + " Model"
+                        status.setText(LanguageManager.t(MainActivity.this, "Retrieved ") + result.models.size() + LanguageManager.t(MainActivity.this, " Model")
                                 + (result.hidden > 0
                                 ? ", Hidden " + result.hidden + " A known unusable model" : ""));
                         if (onDone != null) {
@@ -6663,8 +6681,8 @@ public class MainActivity extends Activity {
                                 applyServiceModel(service, model);
                             }
                         }
-                        Toast.makeText(MainActivity.this,
-                                "Model list updated:" + result.models.size() + " individual",
+                        LanguageManager.toast(MainActivity.this,
+                                LanguageManager.t(MainActivity.this, "Model list updated:") + result.models.size() + LanguageManager.t(MainActivity.this, " individual"),
                                 Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -6684,7 +6702,7 @@ public class MainActivity extends Activity {
                 + new SimpleDateFormat("MM-dd HH:mm", Locale.getDefault())
                 .format(new java.util.Date(fetchedAt));
         status.setTextColor(SUCCESS);
-        status.setText("Cache " + models.size() + " Model" + time);
+        status.setText(LanguageManager.t(this, "Cache ") + models.size() + LanguageManager.t(this, " Model") + time);
     }
 
     private String chooseModelForService(String base, Conversation conversation) {
@@ -6757,7 +6775,7 @@ public class MainActivity extends Activity {
 
     private void showModelCapabilities(final String base, final String model) {
         if (engine.isRunning()) {
-            Toast.makeText(this, "In the course of the mission, stop and modify the model capability", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "In the course of the mission, stop and modify the model capability", Toast.LENGTH_SHORT).show();
             return;
         }
         final ModelProfile profile = prefs.modelProfile(base, model);
@@ -6954,7 +6972,7 @@ public class MainActivity extends Activity {
                 renderAll();
                 updateStatus();
                 markSettingsDirty();
-                Toast.makeText(MainActivity.this, "Model capability saved",
+                LanguageManager.toast(MainActivity.this, "Model capability saved",
                         Toast.LENGTH_SHORT).show();
             }
         });
@@ -6970,7 +6988,7 @@ public class MainActivity extends Activity {
 
     private void showConversationSettings() {
         if (engine.isRunning()) {
-            Toast.makeText(this, "Task is being performed, stop and change session settings", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "Task is being performed, stop and change session settings", Toast.LENGTH_SHORT).show();
             return;
         }
         final Conversation current = engine.currentConversation();
@@ -7139,7 +7157,7 @@ public class MainActivity extends Activity {
 
         form.addView(formLabel("Tool Authorization"), new LinearLayout.LayoutParams(MATCH, WRAP));
         final AgentKit.ValueRow allowedRow = AgentKit.selectRow(this, "Always Allowed Tools",
-                engine.alwaysAllowedTools().size() + " individual", null);
+                engine.alwaysAllowedTools().size() + LanguageManager.t(this, " individual"), null);
         allowedRow.view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -7167,13 +7185,13 @@ public class MainActivity extends Activity {
                 try {
                     base = ModelCatalog.normalizeBase(base);
                 } catch (IllegalArgumentException e) {
-                    Toast.makeText(MainActivity.this, e.getMessage(),
+                    LanguageManager.toast(MainActivity.this, e.getMessage(),
                             Toast.LENGTH_SHORT).show();
                     baseInput.requestFocus();
                     return;
                 }
                 if (model.isEmpty()) {
-                    Toast.makeText(MainActivity.this, "Please fill in the model name.",
+                    LanguageManager.toast(MainActivity.this, "Please fill in the model name.",
                             Toast.LENGTH_SHORT).show();
                     modelInput.requestFocus();
                     return;
@@ -7186,12 +7204,12 @@ public class MainActivity extends Activity {
                     temperature = Float.parseFloat(
                             temperatureInput.getText().toString().trim());
                 } catch (NumberFormatException e) {
-                    Toast.makeText(MainActivity.this, "Please fill in the number.",
+                    LanguageManager.toast(MainActivity.this, "Please fill in the number.",
                             Toast.LENGTH_SHORT).show();
                     return;
                 }
                 if (temperature < 0f || temperature > 2f) {
-                    Toast.makeText(MainActivity.this, "The temperature range is... 0 - 2",
+                    LanguageManager.toast(MainActivity.this, "The temperature range is... 0 - 2",
                             Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -7199,12 +7217,12 @@ public class MainActivity extends Activity {
                     maxTokens = Integer.parseInt(
                             maxTokensInput.getText().toString().trim());
                 } catch (NumberFormatException e) {
-                    Toast.makeText(MainActivity.this, "Max output tokens Please fill in the integer number.",
+                    LanguageManager.toast(MainActivity.this, "Max output tokens Please fill in the integer number.",
                             Toast.LENGTH_SHORT).show();
                     return;
                 }
                 if (maxTokens < 2048 || maxTokens > 65536) {
-                    Toast.makeText(MainActivity.this, "tokens The range is... 2048 - 65536",
+                    LanguageManager.toast(MainActivity.this, "tokens The range is... 2048 - 65536",
                             Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -7212,12 +7230,12 @@ public class MainActivity extends Activity {
                     contextTokens = Integer.parseInt(
                             contextInput.getText().toString().trim());
                 } catch (NumberFormatException e) {
-                    Toast.makeText(MainActivity.this, "Please fill in the integer in the context budget",
+                    LanguageManager.toast(MainActivity.this, "Please fill in the integer in the context budget",
                             Toast.LENGTH_SHORT).show();
                     return;
                 }
                 if (contextTokens < 8000 || contextTokens > 1000000) {
-                    Toast.makeText(MainActivity.this,
+                    LanguageManager.toast(MainActivity.this,
                             "The context budget is: 8000 - 1000000 tokens",
                             Toast.LENGTH_SHORT).show();
                     return;
@@ -7226,12 +7244,12 @@ public class MainActivity extends Activity {
                     maxRounds = Integer.parseInt(
                             roundsInput.getText().toString().trim());
                 } catch (NumberFormatException e) {
-                    Toast.makeText(MainActivity.this, "Type of tool",
+                    LanguageManager.toast(MainActivity.this, "Type of tool",
                             Toast.LENGTH_SHORT).show();
                     return;
                 }
                 if (maxRounds < 8 || maxRounds > 24) {
-                    Toast.makeText(MainActivity.this, "The tool rotation range is 8 - 24",
+                    LanguageManager.toast(MainActivity.this, "The tool rotation range is 8 - 24",
                             Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -7249,10 +7267,10 @@ public class MainActivity extends Activity {
                     dialog.dismiss();
                     renderAll();
                     markSettingsDirty();
-                    Toast.makeText(MainActivity.this, "Session Settings Saved",
+                    LanguageManager.toast(MainActivity.this, "Session Settings Saved",
                             Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(MainActivity.this, "Save failed, check parameters",
+                    LanguageManager.toast(MainActivity.this, "Save failed, check parameters",
                             Toast.LENGTH_SHORT).show();
                 }
             }
@@ -7429,7 +7447,7 @@ public class MainActivity extends Activity {
                     if (holder[0] != null) {
                         holder[0].dismiss();
                     }
-                    Toast.makeText(MainActivity.this, "Cleared Tool Authorization",
+                    LanguageManager.toast(MainActivity.this, "Cleared Tool Authorization",
                             Toast.LENGTH_SHORT).show();
                 }
             });
@@ -7489,7 +7507,7 @@ public class MainActivity extends Activity {
                 if (holder[0] != null) {
                     holder[0].dismiss();
                 }
-                Toast.makeText(MainActivity.this, "Tool Authorization Saved", Toast.LENGTH_SHORT).show();
+                LanguageManager.toast(MainActivity.this, "Tool Authorization Saved", Toast.LENGTH_SHORT).show();
                 showAllowedTools();
             }
         });
@@ -7534,7 +7552,7 @@ public class MainActivity extends Activity {
                 try {
                     startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
                 } catch (Exception e) {
-                    Toast.makeText(MainActivity.this, "Could not open accessibility settings", Toast.LENGTH_SHORT).show();
+                    LanguageManager.toast(MainActivity.this, "Could not open accessibility settings", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -7551,7 +7569,7 @@ public class MainActivity extends Activity {
                     public void onToggle(boolean checked) {
                         prefs.setAllowDeviceControl(checked);
                         updateStatus();
-                        Toast.makeText(MainActivity.this,
+                        LanguageManager.toast(MainActivity.this,
                                 checked ? "Device control is on, please ensure accessibility is in place"
                                         : "Device control closed",
                                 Toast.LENGTH_SHORT).show();
@@ -7610,7 +7628,7 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 if (ScreenCaptureService.isActive()) {
                     ScreenCaptureService.stop(MainActivity.this);
-                    Toast.makeText(MainActivity.this, "Stopping Screen Reading", Toast.LENGTH_SHORT).show();
+                    LanguageManager.toast(MainActivity.this, "Stopping Screen Reading", Toast.LENGTH_SHORT).show();
                 } else {
                     requestScreenCapture();
                 }
@@ -7659,12 +7677,12 @@ public class MainActivity extends Activity {
                                    Dialog[] holder, boolean enableAutomation) {
         String value = input.getText().toString();
         if (value.isEmpty()) {
-            Toast.makeText(this, "Please enter the password first.", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "Please enter the password first.", Toast.LENGTH_SHORT).show();
             input.requestFocus();
             return;
         }
         if (!store.save(value)) {
-            Toast.makeText(this, "Save failed:"
+            LanguageManager.toast(this, "Save failed:"
                             + (store.lastError().isEmpty() ? "Keystore Not Available"
                             : store.lastError()),
                     Toast.LENGTH_LONG).show();
@@ -7678,7 +7696,7 @@ public class MainActivity extends Activity {
         if (holder[0] != null) {
             holder[0].dismiss();
         }
-        Toast.makeText(this, enableAutomation
+        LanguageManager.toast(this, enableAutomation
                         ? "Password is encrypted and automatically filled in"
                         : "Password is encrypted",
                 Toast.LENGTH_LONG).show();
@@ -7764,12 +7782,12 @@ public class MainActivity extends Activity {
                     public void onToggle(boolean checked) {
                         if (checked && !store.hasSecret()) {
                             prefs.setAllowInstallAutomation(false);
-                            Toast.makeText(MainActivity.this,
+                            LanguageManager.toast(MainActivity.this,
                                     "Please import and encrypt the password first", Toast.LENGTH_LONG).show();
                             return;
                         }
                         prefs.setAllowInstallAutomation(checked);
-                        Toast.makeText(MainActivity.this,
+                        LanguageManager.toast(MainActivity.this,
                                 checked ? "Install password automatically completed"
                                         : "Install password to automatically fill closed",
                                 Toast.LENGTH_SHORT).show();
@@ -7784,17 +7802,17 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 if (!store.hasSecret()) {
-                    Toast.makeText(MainActivity.this, "Please import and encrypt the password first",
+                    LanguageManager.toast(MainActivity.this, "Please import and encrypt the password first",
                             Toast.LENGTH_LONG).show();
                     return;
                 }
                 if (!prefs.allowInstallAutomation()) {
-                    Toast.makeText(MainActivity.this, "Please open the 'Authorize Automatic Installation Password' first.",
+                    LanguageManager.toast(MainActivity.this, "Please open the 'Authorize Automatic Installation Password' first.",
                             Toast.LENGTH_LONG).show();
                     return;
                 }
                 boolean started = InstallAssistant.start(MainActivity.this, store, 120000L);
-                Toast.makeText(MainActivity.this, started
+                LanguageManager.toast(MainActivity.this, started
                                 ? "Stand by. 2 minutes;now available for computer execution ADB Install"
                                 : "Installation support startup failed, check accessibility",
                         Toast.LENGTH_LONG).show();
@@ -7835,7 +7853,7 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 boolean ok = DeviceSecretStore.writeTemplate(file);
-                Toast.makeText(MainActivity.this, ok
+                LanguageManager.toast(MainActivity.this, ok
                                 ? "Password file prepared:\n" + file.getAbsolutePath()
                                 : "Could not create password file, check storage permissions",
                         Toast.LENGTH_LONG).show();
@@ -7849,11 +7867,11 @@ public class MainActivity extends Activity {
                     holder[0].dismiss();
                 }
                 if (ok) {
-                    Toast.makeText(MainActivity.this,
+                    LanguageManager.toast(MainActivity.this,
                             "Encrypted password saved and specified files deleted", Toast.LENGTH_LONG).show();
                 } else {
                     String detail = store.lastError();
-                    Toast.makeText(MainActivity.this,
+                    LanguageManager.toast(MainActivity.this,
                             "Import failed: file does not exist, empty or content invalid"
                                     + (detail.isEmpty() ? "" : "(" + detail + ")"),
                             Toast.LENGTH_LONG).show();
@@ -7874,7 +7892,7 @@ public class MainActivity extends Activity {
                                 if (holder[0] != null) {
                                     holder[0].dismiss();
                                 }
-                                Toast.makeText(MainActivity.this,
+                                LanguageManager.toast(MainActivity.this,
                                         "Cleared installed password", Toast.LENGTH_SHORT).show();
                                 showInstallSecretPage();
                             }
@@ -7903,7 +7921,7 @@ public class MainActivity extends Activity {
 
                 @Override
                 public void toast(CharSequence text) {
-                    Toast.makeText(MainActivity.this, text, Toast.LENGTH_SHORT).show();
+                    LanguageManager.toast(MainActivity.this, text, Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
@@ -7920,7 +7938,7 @@ public class MainActivity extends Activity {
                     try {
                         startActivityForResult(intent, REQUEST_MODEL_IMPORT);
                     } catch (Exception e) {
-                        Toast.makeText(MainActivity.this, "Could not open file selection",
+                        LanguageManager.toast(MainActivity.this, "Could not open file selection",
                                 Toast.LENGTH_SHORT).show();
                     }
                 }
@@ -8019,14 +8037,14 @@ public class MainActivity extends Activity {
                 @Override
                 public void onClick(View v) {
                     if (caps.removeMemoryLine(clean)) {
-                        Toast.makeText(MainActivity.this, "Removed this memory",
+                        LanguageManager.toast(MainActivity.this, "Removed this memory",
                                 Toast.LENGTH_SHORT).show();
                         if (holder[0] != null) {
                             holder[0].dismiss();
                         }
                         showMemory();
                     } else {
-                        Toast.makeText(MainActivity.this, "Failed to delete",
+                        LanguageManager.toast(MainActivity.this, "Failed to delete",
                                 Toast.LENGTH_SHORT).show();
                     }
                 }
@@ -8056,12 +8074,12 @@ public class MainActivity extends Activity {
                             @Override
                             public boolean onInput(String value, Dialog dialog) {
                                 if (value.isEmpty()) {
-                                    Toast.makeText(MainActivity.this, "Please fill in.",
+                                    LanguageManager.toast(MainActivity.this, "Please fill in.",
                                             Toast.LENGTH_SHORT).show();
                                     return false;
                                 }
                                 boolean added = caps.appendMemory(value);
-                                Toast.makeText(MainActivity.this,
+                                LanguageManager.toast(MainActivity.this,
                                         added ? "♪ written in long-term memory ♪" : "This memory exists.",
                                         Toast.LENGTH_SHORT).show();
                                 if (added) {
@@ -8093,7 +8111,7 @@ public class MainActivity extends Activity {
                         extract.setEnabled(true);
                         extract.setText("Auto-refining");
                         if (error != null && !error.isEmpty()) {
-                            Toast.makeText(MainActivity.this, error,
+                            LanguageManager.toast(MainActivity.this, error,
                                     Toast.LENGTH_SHORT).show();
                         }
                         if (suggestions == null || suggestions.isEmpty()) {
@@ -8146,7 +8164,7 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 int added = engine.appendMemories(suggestions);
-                Toast.makeText(MainActivity.this, "Written " + added + " A memory.",
+                LanguageManager.toast(MainActivity.this, "Written " + added + " A memory.",
                         Toast.LENGTH_SHORT).show();
                 if (holder[0] != null) {
                     holder[0].dismiss();
@@ -8198,9 +8216,9 @@ public class MainActivity extends Activity {
         stats.addView(AgentKit.title(this, "Session", 13f),
                 new LinearLayout.LayoutParams(MATCH, WRAP));
         stats.addView(AgentKit.hint(this,
-                user + " Question · " + assistant + " Article · " + tools + " Sub-tool Call · "
-                        + errors + " A mistake. · Planned " + done + "/" + total
-                        + " · Context " + context.percent + "%"),
+                user + LanguageManager.t(this, " Question · ") + assistant + LanguageManager.t(this, " Article · ") + tools + LanguageManager.t(this, " Sub-tool Call · ")
+                        + errors + LanguageManager.t(this, " Errors · Planned ") + done + "/" + total
+                        + LanguageManager.t(this, " · Context ") + context.percent + "%"),
                 new LinearLayout.LayoutParams(MATCH, WRAP));
         content.addView(stats, new LinearLayout.LayoutParams(MATCH, WRAP));
 
@@ -8285,7 +8303,7 @@ public class MainActivity extends Activity {
                                         evolve.setEnabled(true);
                                         evolve.setText("Deposition as skills");
                                         if (error != null) {
-                                            Toast.makeText(MainActivity.this, error,
+                                            LanguageManager.toast(MainActivity.this, error,
                                                     Toast.LENGTH_LONG).show();
                                             return;
                                         }
@@ -8362,20 +8380,20 @@ public class MainActivity extends Activity {
                 String description = descInput.getText().toString().trim();
                 String text = bodyInput.getText().toString().trim();
                 if (skillName.isEmpty() || text.isEmpty()) {
-                    Toast.makeText(MainActivity.this, "Name and step cannot be empty",
+                    LanguageManager.toast(MainActivity.this, "Name and step cannot be empty",
                             Toast.LENGTH_SHORT).show();
                     return;
                 }
                 String path = caps.createSkillWithBody(skillName, description, text);
                 if (path == null) {
-                    Toast.makeText(MainActivity.this, "Create failed. Skills may already exist.",
+                    LanguageManager.toast(MainActivity.this, "Create failed. Skills may already exist.",
                             Toast.LENGTH_SHORT).show();
                     return;
                 }
                 if (holder[0] != null) {
                     holder[0].dismiss();
                 }
-                Toast.makeText(MainActivity.this, "Skills created:" + skillName,
+                LanguageManager.toast(MainActivity.this, "Skills created:" + skillName,
                         Toast.LENGTH_SHORT).show();
                 openBaseEditor(path);
             }
@@ -8408,7 +8426,7 @@ public class MainActivity extends Activity {
 
                 @Override
                 public void toast(CharSequence text) {
-                    Toast.makeText(MainActivity.this, text, Toast.LENGTH_SHORT).show();
+                    LanguageManager.toast(MainActivity.this, text, Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
@@ -8456,7 +8474,7 @@ public class MainActivity extends Activity {
             capabilitiesPage = new CapabilitiesPage(this, engine, new CapabilitiesPage.Host() {
                 @Override
                 public void toast(CharSequence text) {
-                    Toast.makeText(MainActivity.this, text, Toast.LENGTH_SHORT).show();
+                    LanguageManager.toast(MainActivity.this, text, Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
@@ -8614,7 +8632,7 @@ public class MainActivity extends Activity {
                     startActivity(new Intent(
                             Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION));
                 } catch (Exception ignored) {
-                    Toast.makeText(this, "Could not open all file access settings",
+                    LanguageManager.toast(this, "Could not open all file access settings",
                             Toast.LENGTH_SHORT).show();
                 }
             }
@@ -8637,13 +8655,13 @@ public class MainActivity extends Activity {
         MediaProjectionManager manager = (MediaProjectionManager)
                 getSystemService(MEDIA_PROJECTION_SERVICE);
         if (manager == null) {
-            Toast.makeText(this, "Device does not support screen reading", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "Device does not support screen reading", Toast.LENGTH_SHORT).show();
             return;
         }
         try {
             startActivityForResult(manager.createScreenCaptureIntent(), REQUEST_SCREEN_CAPTURE);
         } catch (Exception e) {
-            Toast.makeText(this, "Could not close temporary folder: %s", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "Could not close temporary folder: %s", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -8674,7 +8692,7 @@ public class MainActivity extends Activity {
             try {
                 InputStream input = getContentResolver().openInputStream(uri);
                 if (input == null) {
-                    Toast.makeText(this, "Could not read selected file", Toast.LENGTH_LONG).show();
+                    LanguageManager.toast(this, "Could not read selected file", Toast.LENGTH_LONG).show();
                     showLocalAi();
                     return;
                 }
@@ -8685,17 +8703,17 @@ public class MainActivity extends Activity {
                     public void onDone(File file, String error) {
                         wait.dismiss();
                         if (error != null) {
-                            Toast.makeText(MainActivity.this, error,
+                            LanguageManager.toast(MainActivity.this, error,
                                     Toast.LENGTH_LONG).show();
                         } else if (file != null) {
-                            Toast.makeText(MainActivity.this,
+                            LanguageManager.toast(MainActivity.this,
                                     "Model imported:" + file.getName(), Toast.LENGTH_LONG).show();
                         }
                         showLocalAi();
                     }
                 });
             } catch (Exception e) {
-                Toast.makeText(this, "Import failed:"
+                LanguageManager.toast(this, "Import failed:"
                         + (e.getMessage() == null ? e.getClass().getSimpleName()
                         : e.getMessage()), Toast.LENGTH_LONG).show();
                 showLocalAi();
@@ -8714,9 +8732,9 @@ public class MainActivity extends Activity {
             } else {
                 startService(service);
             }
-            Toast.makeText(this, "Screen reading is on;Agent Butch screens when needed", Toast.LENGTH_LONG).show();
+            LanguageManager.toast(this, "Screen reading is on;Agent Butch screens when needed", Toast.LENGTH_LONG).show();
         } else {
-            Toast.makeText(this, "Unopen screen reading", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "Unopen screen reading", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -8730,7 +8748,7 @@ public class MainActivity extends Activity {
             if (cameraGranted) {
                 enterCameraMode();
             } else {
-                Toast.makeText(this, "We need camera access to take pictures.",
+                LanguageManager.toast(this, "We need camera access to take pictures.",
                         Toast.LENGTH_SHORT).show();
             }
             return;
@@ -8740,7 +8758,7 @@ public class MainActivity extends Activity {
         }
         boolean granted = grantResults.length > 0
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
-        Toast.makeText(this, granted ? "Storage privileges granted, work area:" + workspace.label()
+        LanguageManager.toast(this, granted ? "Storage privileges granted, work area:" + workspace.label()
                 : "No storage privileges granted, using the applied internal directory", Toast.LENGTH_LONG).show();
         if (granted) {
             SourceBootstrap.ensureAsync(this);
@@ -8755,7 +8773,7 @@ public class MainActivity extends Activity {
     private void enterScreenshotWatchMode() {
         if (ScreenshotWatchService.isRunning()) {
             updateScreenshotModeBar();
-            Toast.makeText(this, "Screenshot mode is on: use a system screenshot.",
+            LanguageManager.toast(this, "Screenshot mode is on: use a system screenshot.",
                     Toast.LENGTH_SHORT).show();
             return;
         }
@@ -8763,7 +8781,7 @@ public class MainActivity extends Activity {
         if (screenshotModeBar != null) {
             screenshotModeBar.setVisibility(View.VISIBLE);
         }
-        Toast.makeText(this, "Screenshot mode is on: block screens for other applications, and screenshots automatically add to the dialogue",
+        LanguageManager.toast(this, "Screenshot mode is on: block screens for other applications, and screenshots automatically add to the dialogue",
                 Toast.LENGTH_LONG).show();
     }
 
@@ -8813,7 +8831,7 @@ public class MainActivity extends Activity {
                 } catch (Exception ignored) {
                 }
             }
-            Toast.makeText(this, "The attachment is full, no interdictions added", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "The attachment is full, no interdictions added", Toast.LENGTH_SHORT).show();
             return;
         }
         new Thread(new Runnable() {
@@ -8859,7 +8877,7 @@ public class MainActivity extends Activity {
                         if (!added.isEmpty()) {
                             pendingImages.addAll(added);
                             renderAttachmentStrip();
-                            Toast.makeText(MainActivity.this,
+                            LanguageManager.toast(MainActivity.this,
                                     "Yes. " + added.size() + " An amplitude",
                                     Toast.LENGTH_SHORT).show();
                         }
@@ -8874,12 +8892,12 @@ public class MainActivity extends Activity {
             return;
         }
         if (pendingImages.size() >= MAX_ATTACHMENT_COUNT) {
-            Toast.makeText(this, "Up to Attach " + MAX_ATTACHMENT_COUNT + " Picture",
+            LanguageManager.toast(this, "Up to Attach " + MAX_ATTACHMENT_COUNT + " Picture",
                     Toast.LENGTH_SHORT).show();
             return;
         }
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
-            Toast.makeText(this, "No cameras available for the current device", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "No cameras available for the current device", Toast.LENGTH_SHORT).show();
             return;
         }
         if (checkSelfPermission(Manifest.permission.CAMERA)
@@ -9006,7 +9024,7 @@ public class MainActivity extends Activity {
             cameraReady = false;
             String message = error.getMessage() == null
                     ? error.getClass().getSimpleName() : error.getMessage();
-            Toast.makeText(this, "Can not open message" + message, Toast.LENGTH_LONG).show();
+            LanguageManager.toast(this, "Can not open message" + message, Toast.LENGTH_LONG).show();
             closeCameraPreview();
         }
     }
@@ -9052,12 +9070,12 @@ public class MainActivity extends Activity {
             return;
         }
         if (pendingImages.size() >= MAX_ATTACHMENT_COUNT) {
-            Toast.makeText(this, "Up to Attach " + MAX_ATTACHMENT_COUNT + " Picture",
+            LanguageManager.toast(this, "Up to Attach " + MAX_ATTACHMENT_COUNT + " Picture",
                     Toast.LENGTH_SHORT).show();
             return;
         }
         if (!cameraReady || camera == null || cameraCaptureInProgress) {
-            Toast.makeText(this, "The camera is still ready. One moment, please.", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "The camera is still ready. One moment, please.", Toast.LENGTH_SHORT).show();
             return;
         }
         cameraCaptureInProgress = true;
@@ -9076,7 +9094,7 @@ public class MainActivity extends Activity {
                             if (data != null && data.length > 0) {
                                 addCameraImage(data);
                             } else {
-                                Toast.makeText(MainActivity.this, "No photos.",
+                                LanguageManager.toast(MainActivity.this, "No photos.",
                                         Toast.LENGTH_SHORT).show();
                             }
                             cameraCaptureInProgress = false;
@@ -9088,7 +9106,7 @@ public class MainActivity extends Activity {
         } catch (Throwable error) {
             cameraCaptureInProgress = false;
             restartCameraPreview();
-            Toast.makeText(this, "Photo failed:" + error.getClass().getSimpleName(),
+            LanguageManager.toast(this, "Photo failed:" + error.getClass().getSimpleName(),
                     Toast.LENGTH_SHORT).show();
         }
     }
@@ -9107,7 +9125,7 @@ public class MainActivity extends Activity {
 
     private void addCameraImage(final byte[] jpeg) {
         if (pendingImages.size() >= MAX_ATTACHMENT_COUNT) {
-            Toast.makeText(this, "Up to Attach " + MAX_ATTACHMENT_COUNT + " Picture",
+            LanguageManager.toast(this, "Up to Attach " + MAX_ATTACHMENT_COUNT + " Picture",
                     Toast.LENGTH_SHORT).show();
             return;
         }
@@ -9135,12 +9153,12 @@ public class MainActivity extends Activity {
                         if (attachmentHolder[0] != null) {
                             pendingImages.add(attachmentHolder[0]);
                             renderAttachmentStrip();
-                            Toast.makeText(MainActivity.this,
+                            LanguageManager.toast(MainActivity.this,
                                     "Added to Dialogue" + pendingImages.size() + "/"
                                             + MAX_ATTACHMENT_COUNT + ")",
                                     Toast.LENGTH_SHORT).show();
                         } else {
-                            Toast.makeText(MainActivity.this,
+                            LanguageManager.toast(MainActivity.this,
                                     "Photo processing failed:" + failureText, Toast.LENGTH_LONG).show();
                         }
                     }
@@ -9210,7 +9228,7 @@ public class MainActivity extends Activity {
         try {
             startActivityForResult(document, REQUEST_PICK_IMAGES);
         } catch (Exception e) {
-            Toast.makeText(this, "No picture selection available", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "No picture selection available", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -9233,18 +9251,18 @@ public class MainActivity extends Activity {
         }
         if (uris.isEmpty()) {
             Log.w("AgentAttach", "picker returned no uri");
-            Toast.makeText(this, "No pictures. Try again.", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "No pictures. Try again.", Toast.LENGTH_SHORT).show();
             return;
         }
         int room = MAX_ATTACHMENT_COUNT - pendingImages.size();
         if (room <= 0) {
-            Toast.makeText(this, "Up to Attach " + MAX_ATTACHMENT_COUNT + " Picture",
+            LanguageManager.toast(this, "Up to Attach " + MAX_ATTACHMENT_COUNT + " Picture",
                     Toast.LENGTH_SHORT).show();
             return;
         }
         if (uris.size() > room) {
             uris = new ArrayList<>(uris.subList(0, room));
-            Toast.makeText(this, "Up to Attach " + MAX_ATTACHMENT_COUNT + " Picture",
+            LanguageManager.toast(this, "Up to Attach " + MAX_ATTACHMENT_COUNT + " Picture",
                     Toast.LENGTH_SHORT).show();
         }
         final ArrayList<Uri> picked = uris;
@@ -9281,16 +9299,16 @@ public class MainActivity extends Activity {
                         if (!added.isEmpty()) {
                             pendingImages.addAll(added);
                             renderAttachmentStrip();
-                            Toast.makeText(MainActivity.this,
+                            LanguageManager.toast(MainActivity.this,
                                     failureText == null
                                             ? "Added " + added.size() + " Picture"
                                             : "Added " + added.size() + " Zhang, partial failure:" + failureText,
                                     failureText == null ? Toast.LENGTH_SHORT : Toast.LENGTH_LONG).show();
                         } else if (failureText != null) {
-                            Toast.makeText(MainActivity.this, "Image processing failed:" + failureText,
+                            LanguageManager.toast(MainActivity.this, "Image processing failed:" + failureText,
                                     Toast.LENGTH_LONG).show();
                         } else {
-                            Toast.makeText(MainActivity.this, "Could not close temporary folder: %s",
+                            LanguageManager.toast(MainActivity.this, "Could not close temporary folder: %s",
                                     Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -9316,7 +9334,7 @@ public class MainActivity extends Activity {
         try {
             startActivityForResult(fallback, REQUEST_PICK_FILES);
         } catch (Exception e) {
-            Toast.makeText(this, "No File Selector Available", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "No File Selector Available", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -9337,13 +9355,13 @@ public class MainActivity extends Activity {
             }
         }
         if (uris.isEmpty()) {
-            Toast.makeText(this, "No files. Try again.", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "No files. Try again.", Toast.LENGTH_SHORT).show();
             return;
         }
         final int imageRoom = Math.max(0, MAX_ATTACHMENT_COUNT - pendingImages.size());
         final int fileRoom = Math.max(0, MAX_FILE_COUNT - pendingFiles.size());
         if (imageRoom == 0 && fileRoom == 0) {
-            Toast.makeText(this, "The number of annexes reached the maximum", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "The number of annexes reached the maximum", Toast.LENGTH_SHORT).show();
             return;
         }
         final ArrayList<Uri> picked = uris;
@@ -9403,14 +9421,14 @@ public class MainActivity extends Activity {
                         renderAttachmentStrip();
                         int added = images.size() + files.size();
                         if (added > 0 && failures.isEmpty()) {
-                            Toast.makeText(MainActivity.this,
+                            LanguageManager.toast(MainActivity.this,
                                     "Added " + added + " Annex", Toast.LENGTH_SHORT).show();
                         } else if (added > 0) {
-                            Toast.makeText(MainActivity.this,
+                            LanguageManager.toast(MainActivity.this,
                                     "Added " + added + " One, partial failure:" + failures.get(0),
                                     Toast.LENGTH_LONG).show();
                         } else {
-                            Toast.makeText(MainActivity.this,
+                            LanguageManager.toast(MainActivity.this,
                                     "File reading failed:" + (failures.isEmpty() ? "Unknown cause" : failures.get(0)),
                                     Toast.LENGTH_LONG).show();
                         }
@@ -9636,7 +9654,7 @@ public class MainActivity extends Activity {
     private void showAttachmentPreview(String path) {
         Bitmap bitmap = ImageUtils.loadThumbnail(path, 1400);
         if (bitmap == null) {
-            Toast.makeText(this, "Picture is no longer available", Toast.LENGTH_SHORT).show();
+            LanguageManager.toast(this, "Picture is no longer available", Toast.LENGTH_SHORT).show();
             return;
         }
         final Dialog dialog = new Dialog(this);
@@ -9697,7 +9715,7 @@ public class MainActivity extends Activity {
 
             @Override
             public void toast(CharSequence text) {
-                Toast.makeText(MainActivity.this, text, Toast.LENGTH_SHORT).show();
+                LanguageManager.toast(MainActivity.this, text, Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -9748,7 +9766,7 @@ public class MainActivity extends Activity {
         field.setTextSize(14f);
         field.setTextColor(TEXT);
         field.setHintTextColor(DIM);
-        field.setHint(hint);
+        field.setHint(LanguageManager.tUi(this, hint));
         field.setInputType(InputType.TYPE_CLASS_TEXT | variation);
         if (variation == InputType.TYPE_TEXT_VARIATION_PASSWORD) {
             field.setInputType(InputType.TYPE_CLASS_TEXT
@@ -9776,7 +9794,7 @@ public class MainActivity extends Activity {
 
     private TextView formHint(String text) {
         TextView hint = new TextView(this);
-        hint.setText(text);
+        hint.setText(LanguageManager.tUi(this, text));
         hint.setTextColor(DIM);
         hint.setTextSize(10f);
         hint.setLineSpacing(dp(2), 1f);

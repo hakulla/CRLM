@@ -1,17 +1,28 @@
 package org.mobileagent.agent;
 
+import android.util.Log;
+
 import java.io.File;
 import java.util.List;
 
 final class LocalLlm {
     interface TokenListener { void onToken(String piece); }
+    private static final String TAG = "AgentLocalLlm";
     private static final boolean AVAILABLE;
     private volatile long handle;
     private GgufMetadata metadata;
     static {
         boolean loaded = false;
-        try { System.loadLibrary("local_llm"); loaded = nativeApiVersion() == 2; }
-        catch (Throwable ignored) { }
+        try {
+            System.loadLibrary("local_llm");
+            int version = nativeApiVersion();
+            loaded = version == 2;
+            if (!loaded) {
+                Log.w(TAG, "local_llm native API version " + version + ", expected 2");
+            }
+        } catch (Throwable e) {
+            Log.w(TAG, "local_llm load failed", e);
+        }
         AVAILABLE = loaded;
     }
     static boolean available() { return AVAILABLE; }

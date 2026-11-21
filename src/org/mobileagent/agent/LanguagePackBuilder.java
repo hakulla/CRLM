@@ -1,6 +1,7 @@
 package org.mobileagent.agent;
 
 import android.content.Context;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -19,6 +20,8 @@ import java.util.Map;
 
 /** Builds a user-language pack from UI strings with the configured chat model. */
 final class LanguagePackBuilder {
+    private static final String TAG = "LanguagePack";
+
     interface Callback {
         void onResult(boolean ok, String code, String message);
     }
@@ -56,33 +59,15 @@ final class LanguagePackBuilder {
                         if (progress != null) {
                             progress.onProgress("Translating " + end + " / " + total);
                         }
-                        JSONArray input = new JSONArray();
-                        for (String text : batch) {
-                            input.put(text);
+                        Map<String, String> values;
+                        try {
+                            values = translateBatch(base, key, model, languageName, batch);
+                        } catch (Throwable e) {
+                            Log.w(TAG, "batch " + start + " failed; keeping source text", e);
+                            values = new LinkedHashMap<>();
                         }
-                        JSONObject request = new JSONObject();
-                        request.put("model", model);
-                        request.put("stream", false);
-                        request.put("temperature", 0);
-                        JSONArray messages = new JSONArray();
-                        messages.put(new JSONObject().put("role", "system").put("content",
-                                "You localize user-interface strings. Return only a JSON object "
-                                        + "with the exact input strings as keys and translations "
-                                        + "as values. Preserve placeholders such as %s, {name}, "
-                                        + "URLs, code identifiers, and punctuation semantics. "
-                                        + "Do not add explanations or markdown."));
-                        messages.put(new JSONObject().put("role", "user").put("content",
-                                "Target language: " + languageName + "\nStrings: " + input));
-                        request.put("messages", messages);
-                        String content = request(ModelCatalog.chatEndpoint(base), key,
-                                request.toString());
-                        String json = extractJson(content);
-                        if (json == null) {
-                            throw new IllegalStateException("Model did not return a JSON object");
-                        }
-                        JSONObject values = new JSONObject(json);
                         for (String text : batch) {
-                            String value = values.optString(text, "");
+                            String value = values.get(text);
                             translated.put(text, value == null || value.isEmpty() ? text : value);
                         }
                     }
@@ -96,6 +81,56 @@ final class LanguagePackBuilder {
                 }
             }
         }, "crlm-language-pack").start();
+    }
+
+    private static Map<String, String> translateBatch(String base, String key, String model,
+                                                      String languageName, List<String> batch)
+            throws Exception {
+        try {
+            JSONArray input = new JSONArray();
+            for (String text : batch) {
+                input.put(text);
+            }
+            JSONObject request = new JSONObject();
+            request.put("model", model);
+            request.put("stream", false);
+            request.put("temperature", 0);
+            JSONArray messages = new JSONArray();
+            messages.put(new JSONObject().put("role", "system").put("content",
+                    "You localize user-interface strings. Return only a JSON object "
+                            + "with the exact input strings as keys and translations "
+                            + "as values. Preserve placeholders such as %s, {name}, "
+                            + "URLs, code identifiers, and punctuation semantics. "
+                            + "Do not add explanations or markdown."));
+            messages.put(new JSONObject().put("role", "user").put("content",
+                    "Target language: " + languageName + "\nStrings: " + input));
+            request.put("messages", messages);
+            String content = request(ModelCatalog.chatEndpoint(base), key, request.toString());
+            String json = extractJson(content);
+            if (json == null) {
+                throw new IllegalStateException("Model did not return a JSON object");
+            }
+            JSONObject values = new JSONObject(json);
+            Map<String, String> out = new LinkedHashMap<>();
+            for (String text : batch) {
+                String value = values.optString(text, "");
+                if (value != null && !value.isEmpty()) {
+                    out.put(text, value);
+                }
+            }
+            return out;
+        } catch (Exception e) {
+            if (batch.size() <= 10) {
+                throw e;
+            }
+            int middle = batch.size() / 2;
+            Map<String, String> out = new LinkedHashMap<>();
+            out.putAll(translateBatch(base, key, model, languageName,
+                    new ArrayList<>(batch.subList(0, middle))));
+            out.putAll(translateBatch(base, key, model, languageName,
+                    new ArrayList<>(batch.subList(middle, batch.size()))));
+            return out;
+        }
     }
 
     private static String request(String endpoint, String key, String body) throws Exception {

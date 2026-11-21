@@ -15,17 +15,18 @@ if [ -z "$VERSION_CODE" ] || [ -z "$VERSION_NAME" ]; then
   exit 2
 fi
 
+rm -rf "$BUILD/classes" "$BUILD/dex" "$BUILD/gen" "$BUILD/assets"
 mkdir -p "$BUILD/classes" "$BUILD/dex" "$BUILD/gen" "$BUILD/assets"
 if [ -d "$ROOT/assets" ]; then
   cp -R "$ROOT/assets/." "$BUILD/assets/"
 fi
 rm -f "$BUILD/res.zip" "$BUILD/base.apk" "$BUILD/aligned.apk" \
-  "$BUILD/assets/source-seed.zip" \
-  "$BUILD/MobileAgent.apk" "$BUILD/MobileAgent.apk.idsig" "$BUILD/dex/classes.dex"
+  "$BUILD/MobileAgent.apk" "$BUILD/MobileAgent.apk.idsig"
 
 # Ship the app's own source as a seed so a fresh install can edit and rebuild itself.
 (cd "$ROOT" && zip -qr "$BUILD/assets/source-seed.zip" . \
-  -x 'build/*' 'app.apk' 'debug.keystore' '*.idsig' '.git/*' 'assets/source-seed.zip' 'bootstrap.zip')
+  -x 'build/*' 'app.apk' 'app.apk.tmp' '*.keystore' '*.idsig' '.git/*' \
+  'assets/source-seed.zip' 'bootstrap.zip' 'assets/bootstrap.zip' 'toolchain-mac/*')
 if [ -n "${BOOTSTRAP_ZIP:-}" ]; then
   test -f "$BOOTSTRAP_ZIP" || { echo "missing BOOTSTRAP_ZIP=$BOOTSTRAP_ZIP" >&2; exit 2; }
   cp "$BOOTSTRAP_ZIP" "$BUILD/assets/bootstrap.zip"
@@ -53,18 +54,28 @@ fi
 "$BT/zipalign" -f 4 "$BUILD/base.apk" "$BUILD/aligned.apk"
 
 KEYSTORE="$ROOT/debug.keystore"
-if [ -f "$ROOT/toolchain-mac/mobileagent-debug.keystore" ]; then
-  KEYSTORE="$ROOT/toolchain-mac/mobileagent-debug.keystore"
-fi
+for candidate in "$ROOT/toolchain-mac/crlm-debug.keystore" "$ROOT/crlm-debug.keystore"; do
+  if [ -f "$candidate" ]; then
+    KEYSTORE="$candidate"
+    break
+  fi
+done
 if [ ! -f "$KEYSTORE" ]; then
   keytool -genkeypair -keystore "$KEYSTORE" \
-    -storepass android -keypass android -alias mobileagent \
+    -storepass android -keypass android -alias crlm \
     -keyalg RSA -keysize 2048 -validity 10000 \
-    -dname "CN=Mobile Agent Debug, OU=Debug, O=Agent, L=Local, ST=Local, C=CN"
-  chmod 600 "$ROOT/debug.keystore"
+    -dname "CN=CRLM Debug, OU=Debug, O=CRLM, L=Local, ST=Local, C=CN"
+  chmod 600 "$KEYSTORE"
+fi
+ALIAS="${CRLM_KEY_ALIAS:-crlm}"
+if ! keytool -list -alias "$ALIAS" -keystore "$KEYSTORE" -storepass android >/dev/null 2>&1; then
+  if keytool -list -alias mobileagent -keystore "$KEYSTORE" -storepass android >/dev/null 2>&1; then
+    ALIAS=mobileagent
+  fi
 fi
 
 "$BT/apksigner" sign --ks "$KEYSTORE" \
+  --ks-key-alias "$ALIAS" \
   --ks-pass pass:android --key-pass pass:android \
   --out "$BUILD/MobileAgent.apk" "$BUILD/aligned.apk"
 "$BT/zipalign" -c 4 "$BUILD/MobileAgent.apk"

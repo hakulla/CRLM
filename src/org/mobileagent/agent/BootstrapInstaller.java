@@ -76,7 +76,7 @@ final class BootstrapInstaller {
                         @Override
                         public void run() {
                             if (text != null) {
-                                Toast.makeText(app, text, Toast.LENGTH_LONG).show();
+                                LanguageManager.toast(app, text, Toast.LENGTH_LONG).show();
                             }
                             if (ok && onReady != null) {
                                 onReady.run();

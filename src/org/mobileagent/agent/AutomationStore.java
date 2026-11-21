@@ -133,23 +133,23 @@ final class AutomationStore {
         String scheduleSummary() {
             if ("interval".equals(scheduleType)) {
                 if (intervalMinutes % 1440 == 0) {
-                    return "Every " + (intervalMinutes / 1440) + " Oh, my God.";
+                    return "Every " + (intervalMinutes / 1440) + " days";
                 }
                 if (intervalMinutes % 60 == 0) {
-                    return "Every " + (intervalMinutes / 60) + " Hours";
+                    return "Every " + (intervalMinutes / 60) + " hours";
                 }
-                return "Every " + intervalMinutes + " min";
+                return "Every " + intervalMinutes + " minutes";
             }
             String time = String.format(Locale.US, "%02d:%02d", hour, minute);
             if ("weekly".equals(scheduleType)) {
-                String[] names = {"", "Sunday", "Monday.", "Tuesday.", "Wednesday", "Thursday", "Friday.", "Saturday"};
+                String[] names = {"", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
                 int index = Math.max(1, Math.min(7, weekday));
-                return "Every" + names[index] + " " + time;
+                return "Every " + names[index] + " " + time;
             }
             if ("monthly".equals(scheduleType)) {
                 return "Monthly " + Math.max(1, Math.min(28, dayOfMonth)) + " Day " + time;
             }
-            return "Chile " + time;
+            return "Daily " + time;
         }
     }
 

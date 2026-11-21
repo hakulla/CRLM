@@ -223,7 +223,7 @@ public class ScreenshotWatchService extends Service {
                         sendBroadcast(broadcast);
                     } catch (Exception ignored) {
                     }
-                    Toast.makeText(this, "The screenshots are on the line.", Toast.LENGTH_SHORT).show();
+                    LanguageManager.toast(this, "The screenshots are on the line.", Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
                     Log.w("AgentScreenshot", "copy screenshot failed", e);
                 }

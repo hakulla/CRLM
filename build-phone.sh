@@ -50,7 +50,8 @@ cp -r "$P/res" "$B/res"
 
 # The APK carries its own source seed; a fresh install can rebuild itself offline.
 (cd "$P" && zip -qr "$B/assets/source-seed.zip" . \
-  -x 'build/*' 'app.apk' '*.idsig' 'debug.keystore' '.git/*' 'assets/source-seed.zip' 'bootstrap.zip')
+  -x 'build/*' 'app.apk' 'app.apk.tmp' '*.idsig' '*.keystore' '.git/*' \
+  'assets/source-seed.zip' 'bootstrap.zip' 'assets/bootstrap.zip' 'toolchain-mac/*')
 
 # Resources link first: R.java comes from aapt2, so javac must not run before it.
 stage=resources
@@ -97,7 +98,7 @@ echo "[stage] sign"
 java -jar "$T/apksigner.jar" sign \
   --ks "$T/crlm-debug.keystore" \
   --ks-pass pass:android --key-pass pass:android \
-  --ks-key-alias mobileagent \
+  --ks-key-alias crlm \
   --v1-signing-enabled true --v2-signing-enabled true \
   --out "$B/app.apk" "$APK"
 

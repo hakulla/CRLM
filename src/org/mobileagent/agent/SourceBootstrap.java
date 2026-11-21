@@ -72,7 +72,7 @@ final class SourceBootstrap {
                         main.post(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(app, text, Toast.LENGTH_LONG).show();
+                                LanguageManager.toast(app, text, Toast.LENGTH_LONG).show();
                             }
                         });
                     }

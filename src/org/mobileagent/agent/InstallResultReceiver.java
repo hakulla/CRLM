@@ -17,7 +17,7 @@ public class InstallResultReceiver extends BroadcastReceiver {
                 ? "Application installation successfully"
                 : "Application installation not completed:" + (message == null ? "Unknown cause" : message);
         try {
-            Toast.makeText(context, text, Toast.LENGTH_LONG).show();
+            LanguageManager.toast(context, text, Toast.LENGTH_LONG).show();
         } catch (Throwable ignored) {
             // installation results are already recorded in themselves; host window when failed Toast The radio receiver should not be destroyed.
         }
