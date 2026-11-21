@@ -11,8 +11,7 @@ aid, not legal advice.
 - [x] BUILD, ARCHITECTURE, RELEASING, SECURITY, PRIVACY, CHANGELOG
 - [x] CONTRIBUTING and CODE_OF_CONDUCT
 - [x] Issue templates, vulnerability report form, private security guidance, and PR template
-- [x] CI build workflow prepared in `docs/ci/build.yml.example`
-- [ ] Activate the CI workflow under `.github/workflows/` with a workflow-scoped credential
+- [x] CI workflow active under `.github/workflows/` and passing on `main`
 - [ ] Enable private vulnerability reporting after the repository is public
 - [x] Repository description and topics
 - [x] Secret/device-identifier scan of the current tree, history, and release assets

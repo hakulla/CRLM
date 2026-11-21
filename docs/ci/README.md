@@ -1,13 +1,8 @@
 # CI
 
-`build.yml.example` is a ready-to-use GitHub Actions workflow for the Lite APK. GitHub requires a
-credential with the `workflow` scope to create or update files under `.github/workflows/`.
+The GitHub Actions workflow is active at `.github/workflows/build.yml`. It builds the Lite APK on
+Ubuntu with JDK 17, Android platform 36, and build-tools 36.1.0, then uploads the APK as a workflow
+artifact.
 
-To activate it:
-
-1. Copy `docs/ci/build.yml.example` to `.github/workflows/build.yml`.
-2. Push with a GitHub token or SSH key that has permission to update workflows.
-3. Confirm the **Build** workflow succeeds in the repository's Actions tab.
-
-Until then, the workflow is intentionally kept outside `.github/workflows/` so it cannot run or
-be rejected by a token without the workflow scope.
+`build.yml.example` is kept as a reference copy for users who need to recreate the workflow. GitHub
+requires a credential with the `workflow` scope to change files under `.github/workflows/`.

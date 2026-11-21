@@ -1,5 +1,6 @@
 # CRLM
 
+[![Build](https://github.com/hakulla/CRLM/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/hakulla/CRLM/actions/workflows/build.yml)
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE)
 [![Latest release](https://img.shields.io/github/v/release/hakulla/CRLM)](https://github.com/hakulla/CRLM/releases)
 
