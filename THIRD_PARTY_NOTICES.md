@@ -8,9 +8,12 @@ distributed by the Termux project; their licenses follow the upstream projects.
 | Component | Purpose | License |
 | --- | --- | --- |
 | Eclipse JDT Parser (javaparser-core 3.26.2) | Java source analysis | Apache-2.0 (see `deps/LICENSE-javaparser-Apache-2.0.txt`) |
-| llama.cpp (`libllama.so`, `libggml*.so`, `libc++_shared.so`) | On-device model inference | MIT |
+| llama.cpp (`libllama.so`, `libggml*.so`) | On-device model inference | MIT (see `deps/LICENSE-llama.cpp-MIT.txt`) |
+| LLVM libc++ runtime (`libc++_shared.so`) | C++ runtime | Apache-2.0 with LLVM exceptions (see `deps/LICENSE-llvm-NOTICE.txt`) |
 | local_llm (`native/local_llm.cpp`, JNI wrapper) | llama.cpp bridge | Distributed with this app |
 | Android platform (`android.jar`, API references) | Runtime | Apache-2.0 |
+
+The `deps/` directory includes the license texts that accompany the redistributed binaries.
 
 Users who configure a third-party model service do so under that provider's own terms. No model
 service credentials are included in this repository.
@@ -20,8 +23,9 @@ service credentials are included in this repository.
 OpenJDK is GPL-2.0 with the Classpath Exception. git, gawk, findutils, coreutils, make, patch,
 tar, and gzip are GPL-2.0/GPL-3.0. openssl uses an Apache-2.0-style dual license. zlib, libpng,
 expat, and similar libraries use permissive licenses. Distributing GPL components requires making
-the corresponding source or a written offer available; the Termux upstream sources are the source
-of these packages.
+the corresponding source or a valid written offer available; the Termux package repositories and
+the listed upstream projects are the source of these packages. Review these obligations before
+redistributing the Offline build publicly.
 
 | Package | Version |
 | --- | --- |
