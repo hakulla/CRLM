@@ -238,7 +238,7 @@ final class LanguageManager {
                 if (values != null) {
                     for (java.util.Iterator<String> it = values.keys(); it.hasNext(); ) {
                         String key = it.next();
-                        map.put(key, values.optString(key, key));
+                        putTranslation(map, key, values.optString(key, key));
                     }
                 }
                 NAMES.put(code, object.optString("name", "Chinese"));
@@ -251,7 +251,7 @@ final class LanguageManager {
                     if (values != null) {
                         for (java.util.Iterator<String> it = values.keys(); it.hasNext(); ) {
                             String key = it.next();
-                            map.put(key, values.optString(key, key));
+                            putTranslation(map, key, values.optString(key, key));
                         }
                     }
                     NAMES.put(code, object.optString("name", code));
@@ -261,6 +261,23 @@ final class LanguageManager {
         }
         CACHE.put(code, map);
         return map;
+    }
+
+    /** Rejects source tags and malformed generated entries so they can never surface as UI text. */
+    private static void putTranslation(Map<String, String> map, String key, String value) {
+        if (key == null || value == null) {
+            return;
+        }
+        String trimmedKey = key.trim();
+        if (trimmedKey.length() < 3 || key.indexOf('|') >= 0
+                || key.indexOf("\\p{") >= 0) {
+            return;
+        }
+        String trimmedValue = value.trim();
+        if (trimmedValue.isEmpty() || trimmedValue.matches("[|｜\\s]+")) {
+            return;
+        }
+        map.put(key, value);
     }
 
     static List<String> catalog(Context context) {

@@ -52,11 +52,14 @@ final class AppPrefs {
     private static final String KEY_SMART_CONTEXT = "smart_code_context";
     private static final String KEY_LITE_HARNESS = "lite_harness";
     private static final String KEY_ALLOW_OVER_LIMIT = "allow_over_limit";
+    private static final String KEY_MODEL_PARAMS_VERSION = "model_params_version";
+    private static final int MODEL_PARAMS_VERSION = 1;
 
     private final SharedPreferences prefs;
 
     AppPrefs(Context context) {
         prefs = context.getSharedPreferences(FILE, Context.MODE_PRIVATE);
+        applyMaxModelDefaults();
         // Voice input was removed; also drop any stored voice endpoint/key.
         if (prefs.contains("voice_engine") || prefs.contains("voice_base_url")
                 || prefs.contains("voice_api_key") || prefs.contains("voice_model")) {
@@ -65,6 +68,20 @@ final class AppPrefs {
         }
         LocalConfig.install(context, prefs);
         ensureDefaultService();
+    }
+
+    private void applyMaxModelDefaults() {
+        if (prefs.getInt(KEY_MODEL_PARAMS_VERSION, 0) >= MODEL_PARAMS_VERSION) {
+            return;
+        }
+        prefs.edit()
+                .putFloat(KEY_TEMPERATURE, 2f)
+                .putInt(KEY_MAX_TOKENS, 65536)
+                .putString(KEY_THINKING, THINKING_ON)
+                .putInt(KEY_CONTEXT_TOKENS, 1000000)
+                .putInt(KEY_MAX_TOOL_ROUNDS, 24)
+                .putInt(KEY_MODEL_PARAMS_VERSION, MODEL_PARAMS_VERSION)
+                .apply();
     }
 
     private void ensureDefaultService() {
@@ -131,15 +148,15 @@ final class AppPrefs {
     }
 
     float temperature() {
-        float value = prefs.getFloat(KEY_TEMPERATURE, 0.2f);
+        float value = prefs.getFloat(KEY_TEMPERATURE, 2f);
         if (Float.isNaN(value)) {
-            return 0.2f;
+            return 2f;
         }
         return Math.max(0f, Math.min(2f, value));
     }
 
     int maxTokens() {
-        int value = prefs.getInt(KEY_MAX_TOKENS, 4096);
+        int value = prefs.getInt(KEY_MAX_TOKENS, 65536);
         return Math.max(2048, Math.min(65536, value));
     }
 
@@ -148,7 +165,7 @@ final class AppPrefs {
     }
 
     String thinkingMode() {
-        String value = prefs.getString(KEY_THINKING, THINKING_AUTO);
+        String value = prefs.getString(KEY_THINKING, THINKING_ON);
         if (THINKING_AUTO.equals(value) || THINKING_ON.equals(value)) {
             return value;
         }
@@ -161,16 +178,14 @@ final class AppPrefs {
             if (prefs.contains(KEY_CONTEXT_CHARS)) {
                 value = prefs.getInt(KEY_CONTEXT_CHARS, 24000) / 2;
             } else {
-                // Never configured: modern gateway models are used through the same
-                // compiler; 128k keeps long tool results without guessing per model.
-                value = 128000;
+                value = 1000000;
             }
         }
         return Math.max(8000, Math.min(1000000, value));
     }
 
     int maxToolRounds() {
-        int value = prefs.getInt(KEY_MAX_TOOL_ROUNDS, 16);
+        int value = prefs.getInt(KEY_MAX_TOOL_ROUNDS, 24);
         return Math.max(8, Math.min(24, value));
     }
 

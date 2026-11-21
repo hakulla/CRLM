@@ -11,7 +11,7 @@ edits it, runs the local Android build chain, installs the APK, restarts, and ke
 It is not just a chat assistant: it is a pocket workshop that turns ideas into runnable Android
 apps and continuously improves itself.
 
-> **Project status:** public open-source release, version 1.3.3. Licensed under AGPL-3.0-only; see
+> **Project status:** public open-source release, version 1.3.4. Licensed under AGPL-3.0-only; see
 > [License](#license).
 
 ## Highlights
@@ -167,7 +167,7 @@ install still receives its own source. See [BUILD.md](BUILD.md) for details and
 
 ## Known limitations
 
-- The built-in WebView browser timed out on the Android 14 tablet used for the 1.3.3 regression;
+- The built-in WebView browser timed out on the Android 14 tablet used for the 1.3.4 regression;
   a follow-up fix is pending. Other tools are unaffected.
 - Android 13+ may require "Allow restricted settings" before the accessibility service can be
   enabled after a sideload or self-update.

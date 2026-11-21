@@ -51,11 +51,11 @@ final class Conversation {
     String workspace = "";
     String baseUrl = AppPrefs.DEFAULT_BASE_URL;
     String model = AppPrefs.DEFAULT_MODEL;
-    float temperature = 0.2f;
-    int maxTokens = 4096;
-    String thinking = AppPrefs.THINKING_OFF;
-    int contextTokens = 12000;
-    int maxToolRounds = 12;
+    float temperature = 2f;
+    int maxTokens = 65536;
+    String thinking = AppPrefs.THINKING_ON;
+    int contextTokens = 1000000;
+    int maxToolRounds = 24;
     boolean paused;
     boolean archived;
     long pausedAt;
@@ -84,6 +84,7 @@ final class Conversation {
     JSONArray entries = new JSONArray();
     JSONArray workingSet = new JSONArray();
     static final int CURRENT_VERSION = 4;
+    private static final int MODEL_PARAMS_VERSION = 1;
     /** Tool scope was introduced in version 3; older files migrate from the legacy 0.19.1 scope. */
     private static final int TOOL_SCOPE_VERSION = 3;
     int currentVersion = CURRENT_VERSION;
@@ -182,6 +183,7 @@ final class Conversation {
         object.put("thinking", thinking);
         object.put("contextTokens", contextTokens);
         object.put("maxToolRounds", maxToolRounds);
+        object.put("modelParamsVersion", MODEL_PARAMS_VERSION);
         object.put("paused", paused);
         object.put("archived", archived);
         object.put("pausedAt", pausedAt);
@@ -231,7 +233,14 @@ final class Conversation {
                 : object.optInt("contextChars", 24000) / 2;
         conversation.contextTokens = Math.max(8000, Math.min(1000000, loadedContext));
         conversation.maxToolRounds = Math.max(8, Math.min(24,
-                object.optInt("maxToolRounds", 12)));
+                object.optInt("maxToolRounds", 24)));
+        if (object.optInt("modelParamsVersion", 0) < MODEL_PARAMS_VERSION) {
+            conversation.temperature = 2f;
+            conversation.maxTokens = 65536;
+            conversation.thinking = AppPrefs.THINKING_ON;
+            conversation.contextTokens = 1000000;
+            conversation.maxToolRounds = 24;
+        }
         conversation.paused = object.optBoolean("paused", false);
         conversation.archived = object.optBoolean("archived", false);
         conversation.pausedAt = object.optLong("pausedAt", 0L);

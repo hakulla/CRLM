@@ -173,8 +173,8 @@ final class DebugBridge {
                             Math.min(2.0, request.optDouble("temperature", conversation.temperature)));
                 }
                 if (request.has("max_tokens")) {
-                    conversation.maxTokens = Math.max(512,
-                            Math.min(32768, request.optInt("max_tokens", conversation.maxTokens)));
+                    conversation.maxTokens = Math.max(2048,
+                            Math.min(65536, request.optInt("max_tokens", conversation.maxTokens)));
                 }
                 String thinking = request.optString("thinking", "").trim().toLowerCase(Locale.ROOT);
                 if ("off".equals(thinking) || "on".equals(thinking) || "auto".equals(thinking)) {

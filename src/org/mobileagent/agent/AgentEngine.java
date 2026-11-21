@@ -194,30 +194,30 @@ final class AgentEngine {
     private static final int MAX_ENTRIES = 1000;
     private static final int MAX_TOOL_OUTPUT = 12000;
     /** One run of the hard ceiling: at the top, it must be suspended and the user point 'continues' opens a new round. */
-    private static final int HARD_MAX_ROUNDS = 24;
+    private static final int HARD_MAX_ROUNDS = 48;
     /** The user opens the 'Face-through ceiling' without a wheeled subspan (cost-sharing). */
     private static final int OVER_LIMIT_ROUNDS = Integer.MAX_VALUE / 4;
     /** In the absence of any acceptance steps, only so many more rounds are given to export conclusions. */
     private static final int CONVERGE_ROUNDS = 2;
-    private static final long MAX_RUN_MS = 10L * 60L * 1000L;
+    private static final long MAX_RUN_MS = 20L * 60L * 1000L;
     /** The consecutive reading wheel reaches that value and avoids infinity of exploration. */
         private static final int NO_PROGRESS_READ_ROUNDS = 12;
     private static final int SOURCE_READ_TOTAL_LIMIT = 60;
     private static final int SOURCE_READ_PER_FILE_LIMIT = 12;
     private static final int SOURCE_PAGE_LINES = 200;
     /** Same tool to call (name)+(Aggregations) A cumulative maximum number of times. */
-    private static final int REPEAT_CALL_LIMIT = 3;
-    private static final int LITE_CONTEXT_TOKENS = 12000;
-    private static final int LITE_MAX_OUTPUT = 4096;
-    private static final int LITE_ROUNDS = 12;
-    /** Soft ceilings every time there's a real information gain +4, Until the hard limit. */
-    private static final int ROUND_EXTENSION = 4;
-    private static final long LITE_TASK_BUDGET = 120000L;
-    private static final long TASK_BUDGET_EXTENSION = 80000L;
-    private static final long MAX_TASK_BUDGET = 360000L;
-    private static final int MAX_LOADED_ADAPTERS = 6;
-    private static final int AUTO_ADAPTER_USES = 8;
-    private static final int MANUAL_ADAPTER_USES = 4;
+    private static final int REPEAT_CALL_LIMIT = 5;
+    private static final int LITE_CONTEXT_TOKENS = 1000000;
+    private static final int LITE_MAX_OUTPUT = 65536;
+    private static final int LITE_ROUNDS = 24;
+    /** Soft ceilings every time there's a real information gain +6, Until the hard limit. */
+    private static final int ROUND_EXTENSION = 6;
+    private static final long LITE_TASK_BUDGET = 4000000L;
+    private static final long TASK_BUDGET_EXTENSION = 1000000L;
+    private static final long MAX_TASK_BUDGET = 8000000L;
+    private static final int MAX_LOADED_ADAPTERS = 8;
+    private static final int AUTO_ADAPTER_USES = 1;
+    private static final int MANUAL_ADAPTER_USES = 1;
     private static final int MAX_TOOL_SEARCHES = 6;
     private static final int MAX_TOOL_LOADS = 12;
     /** Autorecovering of interruptions only handles the latest 10 Mission in a minute. Avoid reopening. App Burn it. token.  */
@@ -3673,6 +3673,10 @@ final class AgentEngine {
                     + "Don't try. mkdir /tmp. \n"
                     + "- toybox grep Yes. POSIX BRE: `\\|` No, it's not.'or', It doesn't match in silence. Write in multiple mode. "
                     + "`grep -E 'a|b' file`; Yes. Java Find symbols in the source code first. inspect mode=search. \n"
+                    + "- Build APK with build_apk. It builds and signs even when zipalign is absent; a missing zipalign is never a blocker. "
+                    + "Do not search for zipalign, do not ask the user to install it, and do not substitute a manual zip/sign pipeline unless build_apk itself fails.\n"
+                    + "- Install APKs only with install_apk; never use pm or cmd package install (they lack permission). "
+                    + "Open apps only with open_app; never use am or cmd activity start.\n"
                     + "- Yes. git/Package management/When building the tool chain:git Class operations take out a dedicated hosting tool or describe the capability boundaries and ask_user; "
                     + "Build APK Use build_apk, Don't use it. run Repeatedly. command Existence.\n"
                     + "- I want to make sure that some orders have not been made once. `command -v a b c` Finish the question, don't go round.\n"
@@ -3717,7 +3721,8 @@ final class AgentEngine {
             "['Executive'\n"
                     + "- run Yes. /system/bin/sh + toybox; The workspace is /sdcard/MobileAgent; Temporary file writing $TMPDIR. \n"
                     + "- Source Search/Read Only inspect mode=search/read; Ban run It's... awk/sed/cat/head/tail Read source code.\n"
-                    + "- Build APK Use build_apk, Install for install_apk; Yes. git/Package management/The missing command indicates the limits of capability and does not repeat detection.\n"
+                    + "- Build APK Use build_apk, Install APK only with install_apk; never use pm or cmd package install. "
+                    + "Open apps only with open_app, never am/cmd activity start. Yes. git/Package management/The missing command indicates the limits of capability and does not repeat detection.\n"
                     + "- Internal browser: Local HTML Use file://; Local service is only available http://127.0.0.1:Port;browser_open Failed 2 Change the way.\n"
                     + "- Open application open_app; Don't use it. am/cmd starting interface;local HTML Use browser_open(It's automatic.\n"
                     + "- Visual restoration: first find reference diagrams; only better keep comparative reference charts and previous editions for each change; best available storage index.best.html; "
@@ -3794,6 +3799,8 @@ final class AgentEngine {
                 .append("- Model services:").append(activeServiceName)
                 .append("(").append(activeBase).append(")\n")
                 .append("- Application version:").append(appVersionName()).append("\n")
+                .append("- Current UI language: ").append(LanguageManager.current(appContext))
+                .append(". Write ask_user questions/options and short user-facing summaries in that language.\n")
                 .append("- When the user asks you what model or version you use, the information is used directly in the context of the running of this paragraph;"
                         + "Don't speculate on the training data, and don't call yourself. Claude Code. \n\n")
                 .append("[Tool gateway v2]\n")
@@ -4159,38 +4166,40 @@ final class AgentEngine {
                     int doneSteps = completedPlanSteps();
                     boolean productive = planned && doneSteps > lastExtensionCompleted
                             && strategyLedger != null
-                            && strategyLedger.recentGains(6) >= 2
+                            && strategyLedger.recentGains(6) >= 1
                             && !blocked && !failed;
-                    if (productive && nextBudget < HARD_MAX_ROUNDS) {
+                    boolean planOpen = planned && doneSteps < conversation.plan.length();
+                    boolean active = emptyRounds < 2 && !blocked && !failed;
+                    if ((productive || (planOpen && active))
+                            && nextBudget < HARD_MAX_ROUNDS) {
                         int extended = Math.min(roundCeiling(),
                                 nextBudget + ROUND_EXTENSION);
                         lastExtensionCompleted = doneSteps;
                         addEntry(Entry.SYSTEM, "Accepted " + doneSteps + "/"
-                                + conversation.plan.length() + " Step, automatically extend until " + extended
-                                + " Wheel (ceiling) " + roundCeilingLabel() + "). ", false);
+                                + conversation.plan.length() + " Step, the task is still active; automatically extend to "
+                                + extended + " rounds (hard ceiling " + roundCeilingLabel() + ").", false);
                         nextBudget = extended;
                         maxSteps = extended;
                         supervisor.heartbeat(workTicketId, currentRunId, steps, extended);
-                    } else if (!converged) {
-                        // Nothing was accepted, so buying more rounds only buys more
-                        // reading. Spend the remainder on an answer instead.
+                    } else if (!converged && !planOpen) {
+                        // No plan is open: buy only a short conclusion window instead
+                        // of repeatedly paying for blind exploration.
                         converged = true;
                         nextBudget = Math.min(roundCeiling(), steps + CONVERGE_ROUNDS);
                         maxSteps = nextBudget;
-                        addEntry(Entry.SYSTEM, "The current budget cycle was exhausted without any steps being taken to accept and accept it, and was replaced by a mandatory receipt:"
-                                + "Here. " + CONVERGE_ROUNDS + " Round, conclusions must be based on what has been read directly.",
-                                false);
+                        addEntry(Entry.SYSTEM, "The current budget cycle was exhausted without an accepted step; "
+                                + "finishing with " + CONVERGE_ROUNDS
+                                + " conclusion rounds based only on what has been read.", false);
                         injectConvergeNudge();
                     } else {
                         limitPaused = true;
                         if (!planned) {
-                            addEntry(Entry.SYSTEM, "The current round of steps is exhausted and the task has not yet been scheduled for acceptance."
-                                    + "Next call first update_plan List 3-6 The blogger says that the court is not a court of law."
-                                    + "More 'go on.'--No automatic extension would have occurred without a step-in-acceptance.", false);
+                            addEntry(Entry.SYSTEM, "The current round of steps is exhausted and no plan has been created yet. "
+                                    + "Call update_plan with 3-6 verifiable steps, then continue.", false);
                         }
-                        addEntry(Entry.SYSTEM, "A maximum number of steps in this round has been reached (in thousands of years)" + nextBudget
-                                + " (b) Round, no new information gains in the near future, and has been suspended to avoid continued consumption;"
-                                + "The next round of the series is confirmed, or the next round is lifted by the 'up to the ceiling' point.", false);
+                        addEntry(Entry.SYSTEM, "The current soft round budget (" + nextBudget
+                                + ") is exhausted with the plan still open; paused without forcing a final answer. "
+                                + "Send 'continue' for a fresh budget cycle, or enable the hard-ceiling override.", false);
                         paused = true;
                         break;
                     }
@@ -4215,7 +4224,7 @@ final class AgentEngine {
                     // Long.MAX_VALUE/16, Otherwise... long The multiplication will spill negative numbers and drop anomalies.
                     // The context model does not zoom in on the single task budget: windows are available 1M, But the cost ceiling.
                     // Press still 64k Window calculates, avoid burning millions at a time token. 
-                    long windowBudget = (long) Math.min(contextBudget(), 64000) * 12L;
+                    long windowBudget = (long) Math.min(contextBudget(), 1000000) * 12L;
                     long limit = prefs.allowOverLimit() ? Long.MAX_VALUE / 4
                             : prefs.liteHarness() ? LITE_TASK_BUDGET
                             : Math.max(LITE_TASK_BUDGET,
@@ -4227,13 +4236,16 @@ final class AgentEngine {
                             prepared.settings == null ? 0 : prepared.settings.maxTokens);
                     taskBudget.started(budgetReservation);
                 } catch (IllegalStateException budgetError) {
-                    boolean productive = conversation != null && conversation.plan != null
+                    boolean planOpen = conversation != null && conversation.plan != null
                             && conversation.plan.length() > 0
+                            && completedPlanSteps() < conversation.plan.length();
+                    boolean productive = planOpen
                             && strategyLedger != null
-                            && strategyLedger.recentGains(6) >= 2
+                            && strategyLedger.recentGains(6) >= 1
                             && !blocked && !failed;
                     long currentLimit = taskBudget == null ? 0L : taskBudget.limit();
-                    if (productive && currentLimit < MAX_TASK_BUDGET && taskBudget != null) {
+                    if ((productive || planOpen) && currentLimit < MAX_TASK_BUDGET
+                            && taskBudget != null && !blocked && !failed) {
                         long extra = Math.min(TASK_BUDGET_EXTENSION,
                                 MAX_TASK_BUDGET - currentLimit);
                         taskBudget.extend(extra);
@@ -5475,11 +5487,7 @@ final class AgentEngine {
             return Math.max(32000, configured);
         }
         if (prefs.liteHarness()) {
-            // The tool gateway + output reserve needs more headroom than the old
-            // 12k Lite window; the actual request is still only the history sent.
-            // A 16k window cannot hold a ~7k system prompt, 2.5k of tool schemas and a
-            // 4k output reserve at once; 24k is the smallest workable lite floor.
-            return Math.max(24000, Math.max(8000, Math.min(LITE_CONTEXT_TOKENS, configured)));
+            return Math.max(32000, Math.max(8000, Math.min(LITE_CONTEXT_TOKENS, configured)));
         }
         // The old session might still be there. 12k windows;to system tips, tools schema And output reserved a floor,
         // Avoid rereading the models in very narrow contexts.
@@ -6394,7 +6402,7 @@ final class AgentEngine {
                 answer = shorten(text, 500);
             } else if (entry.type == Entry.TOOL) {
                 if (text.startsWith("Call ")) {
-                    String rest = text.substring(3).trim();
+                    String rest = text.substring(5).trim();
                     int space = rest.indexOf(' ');
                     String name = space > 0 ? rest.substring(0, space) : rest;
                     if (!name.isEmpty() && !tools.contains(name)) {
@@ -7252,7 +7260,7 @@ final class AgentEngine {
         }
         if (loadedAdapters.size() >= MAX_LOADED_ADAPTERS
                 && evictAdapter(name) == null) {
-            return "Full adapter slot (%2)" + MAX_LOADED_ADAPTERS + " individual; please complete the current tool before retrying.";
+            return "Adapter slots are full and no other adapter can be replaced; finish the current tool, then retry.";
         }
         loadedAdapters.put(name, MANUAL_ADAPTER_USES);
         refreshToolScope();
@@ -7710,7 +7718,7 @@ final class AgentEngine {
         if (matches.isEmpty()) {
             return okJson("There is no matching adapter. You can try keywords: web page, download, screenshot, device, build,MCP, Memory, index.");
         }
-        StringBuilder out = new StringBuilder("Available adapter (used) tool_load Load, current round is valid, auto-dismount at the end of the mission:\n");
+        StringBuilder out = new StringBuilder("Available adapters (load with tool_load; each stays available for the rest of this task):\n");
         for (int i = 0; i < matches.size() && i < cap; i++) {
             String[] item = matches.get(i);
             out.append("- ").append(item[0]).append(" [").append(item[2]).append("] ")
@@ -7740,7 +7748,7 @@ final class AgentEngine {
             return errorJson("Current Agent Unable to enable tool:" + key + "; Change if you need to use it Agent Scope of the tool.");
         }
         if (loadedAdapters.containsKey(key)) {
-            return okJson("Adapter " + key + " Loaded in this cycle and can be called directly.");
+            return okJson("Adapter " + key + " is already loaded; call it directly (no usage quota).");
         }
         if (toolLoadCount >= MAX_TOOL_LOADS) {
             return errorJson("Current round tool_load Achieved " + MAX_TOOL_LOADS
@@ -7780,9 +7788,9 @@ final class AgentEngine {
         loadedAdapters.put(key, MANUAL_ADAPTER_USES);
         refreshToolScope();
         String note = evicted == null ? ""
-                : "(Automatically unmounted for the longest time " + evicted + " (Pilot space)";
-        return okJson("Loaded " + key + ". Direct calls are available in current round of assignments (maximum) "
-                + MANUAL_ADAPTER_USES + " (a) Number of times, automatic unmounting of the end of the mission)" + note);
+                : " (slot reused; least-recently-used adapter " + evicted + " was unloaded)";
+        return okJson("Loaded " + key + ". It stays available for the rest of this task; "
+                + "there is no per-adapter call quota." + note);
     }
 
     private static String limitText(String text, int max) {
@@ -7943,6 +7951,17 @@ final class AgentEngine {
                     && s.toLowerCase(Locale.ROOT).contains(" start")) {
                 return "Don't use it. cmd activity start starting interface;opening application open_app, "
                         + "Local Web Pages browser_open(It's automatic.";
+            }
+            String lower = s.toLowerCase(Locale.ROOT);
+            if ((head.equals("pm") || head.endsWith("/pm"))
+                    && lower.contains(" install")) {
+                return "Installing APKs with pm is not permitted on this device. "
+                        + "Use the built-in install_apk tool with the APK path in the workspace.";
+            }
+            if (head.equals("cmd") && lower.contains(" package ")
+                    && lower.contains(" install")) {
+                return "Installing APKs with cmd package is not permitted on this device. "
+                        + "Use the built-in install_apk tool with the APK path in the workspace.";
             }
         }
         return null;
@@ -9703,7 +9722,7 @@ final class AgentEngine {
                     + "APK=\"$B/unsigned.apk\"\n"
                     + "if command -v zipalign >/dev/null 2>&1; then\n"
                     + "  zipalign -f 4 \"$B/unsigned.apk\" \"$B/aligned.apk\"; APK=\"$B/aligned.apk\"\n"
-                    + "else echo \"[build] zipalign Not installed, Skip Alignment\"; fi\n"
+                    + "else echo \"[build] zipalign not found; skipped alignment (APK remains installable)\"; fi\n"
                     + "stage=sign; echo \"[stage] sign\"\n"
                     + "java -jar \"$T/apksigner.jar\" sign "
                     + "--ks \"$K\" --ks-pass pass:android "
@@ -10252,9 +10271,9 @@ final class AgentEngine {
         }
         String body = text.trim();
         if (body.startsWith("Call ")) {
-            body = body.substring(3).trim();
+            body = body.substring(5).trim();
         } else if (body.startsWith("Tools ")) {
-            body = body.substring(3).trim();
+            body = body.substring(6).trim();
         }
         int space = body.indexOf(' ');
         return space < 0 ? body : body.substring(0, space);

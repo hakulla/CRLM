@@ -17,6 +17,27 @@ application releases.
 
 - General documentation and repository metadata prepared for public distribution.
 
+## [1.3.4] - 2026-11-21
+
+### Fixed
+
+- Corrected the `"Call "` prefix parsing that left a stray `l` (rendered like `|`) as every tool
+  name in stage headers and step rows.
+- Localized dynamic stage/tool/system/Token/question text in Chinese, removed source-tag keys from
+  the Chinese pack, and filtered malformed generated entries at runtime.
+- Replaced the misleading per-adapter call quota with task-scoped loading and automatic LRU
+  eviction.
+- Removed the forced final answer at the old two-round budget cutoff; open plans now extend while
+  tools are active, with larger context and task budgets.
+- Made `zipalign` explicitly optional for `build_apk` and prevented `pm`/`cmd package install`
+  from being used instead of `install_apk`.
+
+### Changed
+
+- Model defaults now use the application maxima: temperature 2.0, 65536 output tokens, 1M context,
+  24 tool rounds, and deep thinking on. Existing conversations migrate once to these values.
+- Lite mode now honors the configured output/context maxima instead of clamping to 4k/12k.
+
 ## [1.3.3] - 2026-11-21
 
 ### Fixed

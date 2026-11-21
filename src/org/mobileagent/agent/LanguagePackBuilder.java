@@ -50,7 +50,12 @@ final class LanguagePackBuilder {
                                 "Configure a model and base URL in Settings first.");
                         return;
                     }
-                    List<String> source = LanguageManager.catalog(app);
+                    List<String> source = new ArrayList<>();
+                    for (String text : LanguageManager.catalog(app)) {
+                        if (isUiString(text)) {
+                            source.add(text);
+                        }
+                    }
                     Map<String, String> translated = new LinkedHashMap<>();
                     int total = source.size();
                     for (int start = 0; start < total; start += 40) {
@@ -177,6 +182,18 @@ final class LanguagePackBuilder {
         int start = text.indexOf('{');
         int end = text.lastIndexOf('}');
         return start >= 0 && end > start ? text.substring(start, end + 1) : null;
+    }
+
+    private static boolean isUiString(String text) {
+        if (text == null) {
+            return false;
+        }
+        String value = text.trim();
+        if (value.length() < 3 || text.indexOf('|') >= 0
+                || text.indexOf("\\p{") >= 0) {
+            return false;
+        }
+        return !value.matches("[A-Za-z0-9_./\\\\-]{1,3}");
     }
 
     private static String slug(String name) {

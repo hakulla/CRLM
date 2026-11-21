@@ -791,7 +791,8 @@ public class MainActivity extends Activity {
         spinnerParams.setMargins(0, 0, dp(6), 0);
         runStatusBar.addView(runSpinner, spinnerParams);
         runStatusText = new TextView(this);
-        runStatusText.setText(engine.runPhase().isEmpty() ? "Task in progress..." : engine.runPhase());
+        runStatusText.setText(LanguageManager.tUi(this,
+                engine.runPhase().isEmpty() ? "Task in progress..." : engine.runPhase()));
         runStatusText.setTextColor(MUTED);
         runStatusText.setTextSize(11f);
         runStatusBar.addView(runStatusText, new LinearLayout.LayoutParams(0, WRAP, 1f));
@@ -804,7 +805,7 @@ public class MainActivity extends Activity {
         runStatusBar.addView(runStepText, new LinearLayout.LayoutParams(WRAP, WRAP));
 
         runLimitText = new TextView(this);
-        runLimitText.setText("Breaking the ceiling.");
+        runLimitText.setText(LanguageManager.t(this, "Breaking the ceiling."));
         runLimitText.setTextColor(TEXT);
         runLimitText.setTextSize(9.5f);
         runLimitText.setBackground(rounded(CARD_SOFT, 9));
@@ -822,7 +823,7 @@ public class MainActivity extends Activity {
         runStatusBar.addView(runLimitText, limitParams);
 
         runPauseText = new TextView(this);
-        runPauseText.setText("Pause");
+        runPauseText.setText(LanguageManager.t(this, "Pause"));
         runPauseText.setTextColor(TEXT);
         runPauseText.setTextSize(9.5f);
         runPauseText.setBackground(rounded(CARD_SOFT, 9));
@@ -854,7 +855,7 @@ public class MainActivity extends Activity {
         runStatusBar.addView(runPauseText, pauseParams);
 
         runStopText = new TextView(this);
-        runStopText.setText("Stop");
+        runStopText.setText(LanguageManager.t(this, "Stop"));
         runStopText.setTextColor(ERROR);
         runStopText.setTextSize(9.5f);
         runStopText.setBackground(rounded(CARD_SOFT, 9));
@@ -2795,7 +2796,7 @@ public class MainActivity extends Activity {
         if (entry == null || entry.text == null || !entry.text.startsWith("Call ")) {
             return "";
         }
-        String body = entry.text.substring(3).trim();
+        String body = entry.text.substring(5).trim();
         int space = body.indexOf(' ');
         if (space < 0) {
             return "";
@@ -2822,7 +2823,7 @@ public class MainActivity extends Activity {
     }
 
     /** Agent It's...'Thinking'The core is the next command, not the double drive; the prefix is added when no next semantic is added. */
-    private static String nextStepPreview(String text) {
+    private String nextStepPreview(String text) {
         String preview = thoughtPreview(text);
         if (preview.isEmpty()) {
             return "";
@@ -2834,7 +2835,7 @@ public class MainActivity extends Activity {
                 || lower.startsWith("now")) {
             return preview;
         }
-        return "Next steps:" + preview;
+        return LanguageManager.t(this, "Next steps:") + preview;
     }
 
     private static boolean sameThought(String left, String right) {
@@ -2882,7 +2883,8 @@ public class MainActivity extends Activity {
         row.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showDetailSheet("Think.", full == null || full.trim().isEmpty() ? preview : full);
+                showDetailSheet(LanguageManager.t(MainActivity.this, "Think."),
+                        full == null || full.trim().isEmpty() ? preview : full);
             }
         });
         row.setTag("th|" + key + "|" + preview);
@@ -2891,7 +2893,10 @@ public class MainActivity extends Activity {
 
     private void addStepRow(final AgentEngine.Entry call, final AgentEngine.Entry result,
                             boolean running) {
-        String body = call.text.substring(3).trim();
+        String body = call.text.substring(5).trim();
+        if (body.isEmpty()) {
+            return;
+        }
         int space = body.indexOf(' ');
         String name = space < 0 ? body : body.substring(0, space);
         String argsText = space < 0 ? "" : body.substring(space + 1).trim();
@@ -2900,7 +2905,7 @@ public class MainActivity extends Activity {
             args = new JSONObject(argsText);
         } catch (Exception ignored) {
         }
-        String label = ToolPresentation.label(name, args);
+        String label = LanguageManager.t(this, ToolPresentation.label(name, args));
         String summary = ToolPresentation.argumentSummary(name, args);
         String iconName = ToolPresentation.icon(name);
         boolean failed = result != null && result.text.startsWith("Tools ")
@@ -2948,7 +2953,7 @@ public class MainActivity extends Activity {
         row.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showDetailSheet("Details of the steps", detail);
+                showDetailSheet(LanguageManager.t(MainActivity.this, "Details of the steps"), detail);
             }
         });
         row.setTag("step|" + call.time + "|" + call.text);
@@ -3051,9 +3056,12 @@ public class MainActivity extends Activity {
             if (step.type != AgentEngine.Entry.TOOL || !step.text.startsWith("Call ")) {
                 continue;
             }
-            String body = step.text.substring(3).trim();
+            String body = step.text.substring(5).trim();
             int space = body.indexOf(' ');
             String name = space < 0 ? body : body.substring(0, space);
+            if (name.length() < 2) {
+                continue;
+            }
             JSONObject stepArgs = null;
             try {
                 stepArgs = new JSONObject(space < 0 ? "" : body.substring(space + 1).trim());
@@ -3074,11 +3082,15 @@ public class MainActivity extends Activity {
         header.addView(vectorIcon(calls > 0 ? "ic_terminal" : "ic_sparkle", MUTED),
                 iconSize(dp(16), dp(9)));
         TextView label = new TextView(this);
-        label.setText(expanded
-                ? "Implementation process · " + (calls > 0 ? calls + " Step Tool Call" : "Think.") + " · Put it away."
-                : "Implementation process · " + (calls > 0 ? calls + " Step" : "Think.")
-                + (live ? " · Running" : "")
-                + (lastAction.isEmpty() ? "" : " · " + lastAction));
+        String processCount = calls > 0
+                ? calls + LanguageManager.t(this, expanded ? " Step Tool Call" : " Step")
+                : LanguageManager.t(this, "Think.");
+        String processState = live ? " · " + LanguageManager.t(this, "Running") : "";
+        String processAction = lastAction.trim().length() < 2 ? ""
+                : " · " + LanguageManager.t(this, lastAction);
+        String processCollapse = expanded ? " · " + LanguageManager.t(this, "Put it away.") : "";
+        label.setText(LanguageManager.t(this, "Implementation process · ")
+                + processCount + processState + processAction + processCollapse);
         label.setTextColor(MUTED);
         label.setTextSize(12f);
         label.setSingleLine(true);
@@ -3181,8 +3193,9 @@ public class MainActivity extends Activity {
         });
         TextView title = new TextView(this);
         title.setText(activeStep.length() == 0
-                ? (completed >= plan.length() ? "Implementation plan completed" : "Implementation plan")
-                : "Implementation plan · " + activeStep);
+                ? LanguageManager.t(this, completed >= plan.length()
+                ? "Implementation plan completed" : "Implementation plan")
+                : LanguageManager.t(this, "Implementation plan · ") + activeStep);
         title.setTextColor(TEXT);
         title.setTextSize(12f);
         title.setTypeface(Typeface.DEFAULT_BOLD);
@@ -3210,6 +3223,9 @@ public class MainActivity extends Activity {
             }
             String status = step.optString("status", "pending");
             String stepTitle = step.optString("title", "");
+            if (stepTitle.trim().matches("[|｜\\s]*")) {
+                stepTitle = LanguageManager.t(this, "Step") + " " + (i + 1);
+            }
             LinearLayout row = new LinearLayout(this);
             row.setOrientation(LinearLayout.HORIZONTAL);
             row.setGravity(Gravity.CENTER_VERTICAL);
@@ -3834,6 +3850,9 @@ public class MainActivity extends Activity {
     }
 
     private void addReasoningRow(final AgentEngine.Entry entry, boolean last) {
+        if (entry.text == null || entry.text.trim().isEmpty()) {
+            return;
+        }
         final boolean expanded = reasoningOpen.contains(entry.time)
                 || (!reasoningClosed.contains(entry.time) && last
                 && entry.text.length() <= 4000);
@@ -3889,7 +3908,10 @@ public class MainActivity extends Activity {
     }
 
     private void addToolRow(final AgentEngine.Entry entry) {
-        String body = entry.text.substring(3).trim();
+        String body = entry.text.substring(5).trim();
+        if (body.isEmpty()) {
+            return;
+        }
         int space = body.indexOf(' ');
         String name = space < 0 ? body : body.substring(0, space);
         String argsText = space < 0 ? "" : body.substring(space + 1).trim();
@@ -3899,7 +3921,7 @@ public class MainActivity extends Activity {
         } catch (Exception ignored) {
         }
         String summary = ToolPresentation.argumentSummary(name, args);
-        String label = ToolPresentation.label(name);
+        String label = LanguageManager.t(this, ToolPresentation.label(name));
         String iconName = ToolPresentation.icon(name);
         final String detail = label + (summary.isEmpty() ? "" : "  " + summary)
                 + (argsText.isEmpty() || "{}".equals(argsText)
@@ -3948,7 +3970,8 @@ public class MainActivity extends Activity {
                 body.setLineSpacing(dp(3), 1f);
                 body.setTextIsSelectable(true);
                 content.addView(body, new LinearLayout.LayoutParams(MATCH, WRAP));
-                AgentKit.sheet(MainActivity.this, "Details of the steps", content);
+                AgentKit.sheet(MainActivity.this,
+                        LanguageManager.t(MainActivity.this, "Details of the steps"), content);
             }
         });
         row.setTag("t|" + entry.time + "|" + entry.text);
@@ -3961,6 +3984,9 @@ public class MainActivity extends Activity {
     }
 
     private void addIntentRow(long key, String intent) {
+        if (intent == null || intent.trim().isEmpty()) {
+            return;
+        }
         TextView row = new TextView(this);
         String shown = intent.length() > 120 ? intent.substring(0, 120) + "..." : intent;
         row.setText(LanguageManager.t(this, "Think. · ") + shown);
@@ -4050,8 +4076,10 @@ public class MainActivity extends Activity {
         card.setPadding(dp(14), dp(12), dp(14), dp(12));
 
         TextView title = new TextView(this);
-        title.setText(answered ? "Question answered. · Click to Modify"
-                : "I need your answer. " + questions.length() + " A question.");
+        title.setText(answered
+                ? LanguageManager.t(this, "Question answered. · Click to Modify")
+                : LanguageManager.t(this, "I need your answer.") + " "
+                + questions.length() + LanguageManager.t(this, " A question."));
         title.setTextColor(answered ? MUTED : TEXT);
         title.setTextSize(13f);
         card.addView(title, new LinearLayout.LayoutParams(MATCH, WRAP));
@@ -4062,15 +4090,15 @@ public class MainActivity extends Activity {
                 continue;
             }
             TextView line = new TextView(this);
-            line.setText((i + 1) + ". " + item.optString("question", "")
-                    + choiceSuffix(item));
+            line.setText((i + 1) + ". " + localizeSystemText(item.optString("question", ""))
+                    + LanguageManager.t(this, choiceSuffix(item)));
             line.setTextColor(MUTED);
             line.setTextSize(11.5f);
             line.setPadding(0, dp(7), 0, 0);
             card.addView(line, new LinearLayout.LayoutParams(MATCH, WRAP));
             if (answered && saved[i] != null && !saved[i].trim().isEmpty()) {
                 TextView answer = new TextView(this);
-                answer.setText("Response:" + saved[i]);
+                answer.setText(LanguageManager.tUi(this, "Response:" + saved[i]));
                 answer.setTextColor(TEXT);
                 answer.setTextSize(11.5f);
                 answer.setPadding(dp(10), dp(2), 0, 0);
@@ -4237,12 +4265,14 @@ public class MainActivity extends Activity {
             footer.setOrientation(LinearLayout.HORIZONTAL);
             footer.setGravity(Gravity.CENTER_VERTICAL);
             footer.setPadding(dp(18), dp(10), dp(18), 0);
-            backLabel = footerButton("‹ Previous question");
+            backLabel = footerButton(LanguageManager.tUi(MainActivity.this,
+                    "‹ Previous question"));
             progressLabel = new TextView(MainActivity.this);
             progressLabel.setTextColor(DIM);
             progressLabel.setTextSize(11.5f);
             progressLabel.setGravity(Gravity.CENTER);
-            forwardLabel = footerButton("Next question. ›");
+            forwardLabel = footerButton(LanguageManager.tUi(MainActivity.this,
+                    "Next question. ›"));
             footer.addView(backLabel, new LinearLayout.LayoutParams(0, WRAP, 1f));
             footer.addView(progressLabel, new LinearLayout.LayoutParams(0, WRAP, 1.4f));
             footer.addView(forwardLabel, new LinearLayout.LayoutParams(0, WRAP, 1f));
@@ -4271,7 +4301,8 @@ public class MainActivity extends Activity {
             panel.addView(scroll, new LinearLayout.LayoutParams(MATCH, 0, 1f));
             panel.addView(footer, new LinearLayout.LayoutParams(MATCH, WRAP));
             try {
-                dialog = AgentKit.sheet(MainActivity.this, "Answer the question.", panel);
+                dialog = AgentKit.sheet(MainActivity.this,
+                        LanguageManager.tUi(MainActivity.this, "Answer the question."), panel);
                 refresh();
             } catch (WindowManager.BadTokenException e) {
                 Log.w("AgentUI", "question sheet failed: bad token", e);
@@ -4300,7 +4331,8 @@ public class MainActivity extends Activity {
             boolean multi = item.optBoolean("multi", false);
             String question = item.optString("question", "");
             TextView head = new TextView(MainActivity.this);
-            head.setText(question + (multi ? "\n((More Selectable)" : "\n(Single)"));
+            head.setText(localizeSystemText(
+                    question + (multi ? "\n((More Selectable)" : "\n(Single)")));
             head.setTextColor(TEXT);
             head.setTextSize(14f);
             head.setLineSpacing(dp(3), 1f);
@@ -4327,7 +4359,8 @@ public class MainActivity extends Activity {
                     mark.setTextSize(13f);
                     row.addView(mark, new LinearLayout.LayoutParams(WRAP, WRAP));
                     TextView label = new TextView(MainActivity.this);
-                    label.setText((i == 0 ? "Recommendations · " : "") + value);
+                    label.setText(LanguageManager.tUi(MainActivity.this,
+                            (i == 0 ? "Recommendations · " : "") + value));
                     label.setTextColor(selected ? TEXT : MUTED);
                     label.setTextSize(12.5f);
                     label.setPadding(dp(9), 0, 0, 0);
@@ -4371,7 +4404,8 @@ public class MainActivity extends Activity {
             progressLabel.setText((page + 1) + " / " + questions.length());
             backLabel.setEnabled(page > 0);
             backLabel.setAlpha(page > 0 ? 1f : 0.35f);
-            forwardLabel.setText(page < questions.length() - 1 ? "Next question. ›" : "Submit");
+            forwardLabel.setText(LanguageManager.tUi(MainActivity.this,
+                    page < questions.length() - 1 ? "Next question. ›" : "Submit"));
             free.addTextChangedListener(new android.text.TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -4444,6 +4478,80 @@ public class MainActivity extends Activity {
         }
     }
 
+    private String localizeSystemText(String text) {
+        String out = LanguageManager.tUi(this, text);
+        out = out.replace("'run'Failed:", "run 失败：");
+        out = out.replace("Command exit code ", "命令退出码 ");
+        out = out.replace("Permission denied", "权限被拒绝");
+        out = out.replace("Repeating the same command will not bring new information",
+                "重复同一命令不会产生新信息");
+        out = out.replace("more output is needed to post the results to the file inspect mode=read",
+                "请把更多输出写入文件后用 inspect mode=read 读取");
+        out = out.replace("; more output is needed", "；需要更多输出");
+        out = out.replace("more output is needed", "需要更多输出");
+        out = out.replace("cp: cannot create regular file", "cp：无法创建文件");
+        out = out.replace("。.", "。");
+        out = out.replace("), ", "），");
+        out = out.replace("(1/2)", "（1/2）");
+        out = out.replace(" 次)", " 次）");
+        out = out.replace("Source is off limits.", "源码读取受限。");
+        out = out.replaceAll(
+                "run/(cat|sed|awk|head|tail) Read\\. Use the inspect mode=read\\(offset/limit page break\\) or mode=search; This order was not implemented\\.",
+                "不要用 run/$1 读取源码；请使用 inspect mode=read（offset/limit 分页）或 mode=search；该命令未执行。");
+        out = out.replace("; Please update the status of the planned steps.",
+                "；请更新计划步骤状态。");
+        out = out.replace("Please update the status of the planned steps.",
+                "请更新计划步骤状态。");
+        out = out.replace("Tools failed, automatic change of strategy continues:",
+                "工具失败，自动切换策略继续：");
+        out = out.replace("Similar errors have occurred.", "已发生类似错误。");
+        out = out.replace(" Number of times", " 次");
+        out = out.replace("The following is suspended and is requested for guidance:",
+                "任务已暂停，等待你的指示：");
+        out = out.replace("Without permission or authorization, you're required to operate before you can continue.",
+                "没有权限或授权，需要先授权才能继续。");
+        out = out.replace("The mission has been suspended. Point 'continue' to resume from the current pace.",
+                "任务已暂停。点击“继续”从当前进度恢复。");
+        out = out.replace("You can also enter a new command directly to continue.",
+                "也可以直接输入新指令继续。");
+        out = out.replace("状态监控: strategy is being applied to correct (%)",
+                "状态监控：正在修正策略（");
+        out = out.replace("Policy device No continuous information gain)",
+                "策略设备无持续信息增益）");
+        out = out.replace("(It's automatic, but it needs to be re-interfaced....",
+                "（会自动截图）。");
+        out = out.replace("(It's automatic, but it needs to be re-interfaced.",
+                "（会自动截图）。");
+        out = out.replaceAll("Tools ([A-Za-z0-9_]+) Failed:", "工具 $1 失败：");
+        out = out.replaceAll("Tools ([A-Za-z0-9_]+) Completed", "工具 $1 完成");
+        out = out.replace("No text found on interface:", "界面上未找到文本：");
+        out = out.replace("Don't use it. am Start interface or broadcast: apply identity execution am Unreliable.",
+                "不要用 am 启动界面或广播：应用身份执行 am 不可靠。");
+        out = out.replace("Open application open_app; Open Local HTML Or read it for retrofitting. browser_open",
+                "请用 open_app 打开应用；本地 HTML 用 browser_open");
+        out = out.replace("Connection interrupted (Network connection is down. Check the network.)",
+                "连接中断（网络不可用，请检查网络）");
+        out = out.replace("Auto retry after seconds", "秒后自动重试");
+        out = out.replace("Stopping...", "正在停止…");
+        out = out.replace("The mission has been discontinued.", "任务已停止。");
+        out = out.replace("Status monitoring: strategy is being applied to correct (%)",
+                "状态监控：正在修正策略（");
+        out = out.replace("Cumulative appearance of the same tool called ", "同一工具累计调用 ");
+        if (out.startsWith("本轮运行 Token：") || out.startsWith("Current run token:")) {
+            out = out.replace("Current run token:", "本轮运行 Token：")
+                    .replace("Input ", "输入 ")
+                    .replace("(Cache Cache ", "（缓存 ")
+                    .replace("), Output ", "），输出 ")
+                    .replace(", Tools ", "，工具 ")
+                    .replace(" Number of times", " 次")
+                    .replace("; context Work Set ", "；上下文工作集 ")
+                    .replace(" Article / Archive ", " 条 / 归档 ")
+                    .replace(" bytes.", " 字节。");
+            out = out.replaceAll("[,，]\\s*Output\\s+", "，输出 ");
+        }
+        return out;
+    }
+
     private void addErrorRow(AgentEngine.Entry entry) {
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
@@ -4452,7 +4560,7 @@ public class MainActivity extends Activity {
         ImageView icon = vectorIcon("ic_close", ERROR);
         row.addView(icon, iconSize(dp(15), dp(9)));
         TextView body = new TextView(this);
-        body.setText(entry.text);
+        body.setText(localizeSystemText(entry.text));
         body.setTextColor(ERROR);
         body.setTextSize(12f);
         body.setLineSpacing(dp(3), 1f);
@@ -4463,7 +4571,7 @@ public class MainActivity extends Activity {
 
     private void addStatusRow(AgentEngine.Entry entry) {
         TextView body = new TextView(this);
-        body.setText(entry.text);
+        body.setText(localizeSystemText(entry.text));
         body.setTextColor(DIM);
         body.setTextSize(10.5f);
         body.setPadding(dp(4), dp(5), dp(4), dp(5));
@@ -5316,7 +5424,7 @@ public class MainActivity extends Activity {
                 }
                 runStatusText.setText(engine.limitPaused() ? "Achieving the ceiling, suspended" : "Task suspended.");
                 runStepText.setText(engine.currentStep() + "/" + maxLabel);
-                runPauseText.setText("Go on.");
+                runPauseText.setText(LanguageManager.t(this, "Go on."));
             } else if (running) {
                 if (runSpinner != null) {
                     runSpinner.setVisibility(View.VISIBLE);
@@ -5330,11 +5438,11 @@ public class MainActivity extends Activity {
         if (!hasText && statusDetail != null && !statusDetail.isEmpty()) {
             statusText = statusText + "  " + statusDetail;
         }
-        runStatusText.setText(statusText);
+        runStatusText.setText(LanguageManager.tUi(this, statusText));
         runStatusText.setSingleLine(true);
         runStatusText.setEllipsize(android.text.TextUtils.TruncateAt.END);
                 runStepText.setText(engine.currentStep() + "/" + maxLabel);
-                runPauseText.setText("Pause");
+                runPauseText.setText(LanguageManager.t(this, "Pause"));
             } else {
                 if (runSpinner != null) {
                     runSpinner.setVisibility(View.GONE);
@@ -5348,8 +5456,8 @@ public class MainActivity extends Activity {
             if (runLimitText != null) {
                 boolean overLimit = prefs.allowOverLimit();
                 runLimitText.setVisibility(paused || running ? View.VISIBLE : View.GONE);
-                runLimitText.setText(overLimit ? "The ceiling is open."
-                        : engine.limitPaused() ? "Break the ceiling and continue." : "Breaking the ceiling.");
+                runLimitText.setText(LanguageManager.t(this, overLimit ? "The ceiling is open."
+                        : engine.limitPaused() ? "Break the ceiling and continue." : "Breaking the ceiling."));
                 runLimitText.setTextColor(overLimit ? Color.rgb(232, 188, 92) : TEXT);
             }
         }
@@ -7104,9 +7212,7 @@ public class MainActivity extends Activity {
 
         form.addView(formLabel("Max output tokens"), new LinearLayout.LayoutParams(MATCH, WRAP));
         final EditText maxTokensInput = numberInput(
-                String.valueOf(prefs.liteHarness()
-                        ? Math.min(current.maxTokens, 4096) : current.maxTokens),
-                "2048 - 65536", false);
+                String.valueOf(current.maxTokens), "2048 - 65536", false);
         form.addView(maxTokensInput, new LinearLayout.LayoutParams(MATCH, WRAP));
 
         form.addView(formLabel("Think deep"), new LinearLayout.LayoutParams(MATCH, WRAP));
@@ -7114,7 +7220,7 @@ public class MainActivity extends Activity {
         final String[] thinkingValues = {AppPrefs.THINKING_OFF,
                 AppPrefs.THINKING_AUTO, AppPrefs.THINKING_ON};
         final String[] thinkingChoice = {current.thinking == null
-                ? AppPrefs.THINKING_OFF : current.thinking};
+                ? AppPrefs.THINKING_ON : current.thinking};
         String thinkingLabel = thinkingLabels[0];
         for (int i = 0; i < thinkingValues.length; i++) {
             if (thinkingValues[i].equals(thinkingChoice[0])) {
@@ -7137,22 +7243,17 @@ public class MainActivity extends Activity {
 
         form.addView(formLabel("Context budget (%)token)"), new LinearLayout.LayoutParams(MATCH, WRAP));
         final EditText contextInput = numberInput(
-                String.valueOf(prefs.liteHarness()
-                        ? Math.min(current.contextTokens, 12000) : current.contextTokens),
-                "8000 - 1000000", false);
+                String.valueOf(current.contextTokens), "8000 - 1000000", false);
         form.addView(contextInput, new LinearLayout.LayoutParams(MATCH, WRAP));
-        form.addView(formHint("Press the one sent to the model token Estimates;Lite The most active mode 12k, "
-                        + "The old tool output will automatically omit and will not delete messages that have been saved from this dialogue."),
+        form.addView(formHint("Estimated from tokens sent to the model. Old tool output is omitted "
+                        + "without deleting saved messages."),
                 new LinearLayout.LayoutParams(MATCH, WRAP));
 
         form.addView(formLabel("Tool rotation budget"), new LinearLayout.LayoutParams(MATCH, WRAP));
         final EditText roundsInput = numberInput(
-                String.valueOf(prefs.liteHarness()
-                        ? Math.min(current.maxToolRounds, 12) : current.maxToolRounds),
-                "8 - 24", false);
+                String.valueOf(current.maxToolRounds), "8 - 24", false);
         form.addView(roundsInput, new LinearLayout.LayoutParams(MATCH, WRAP));
-        form.addView(formHint("Lite Default 12 The next round is suspended when the budget is reached and you 'continue' to execute the next batch."
-                        + "Run hard maximum once 24 Round or 10 Minutes."),
+        form.addView(formHint("Soft budget 24 rounds; hard ceiling 48 rounds or 20 minutes."),
                 new LinearLayout.LayoutParams(MATCH, WRAP));
 
         form.addView(formLabel("Tool Authorization"), new LinearLayout.LayoutParams(MATCH, WRAP));
