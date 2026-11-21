@@ -51,6 +51,8 @@ public final class WorkCenterActivity extends Activity {
         supervisor = WorkSupervisor.get(this);
         prefs = new AppPrefs(this);
         setContentView(build());
+        LanguageManager.apply(getWindow().getDecorView());
+        LanguageManager.watch(getWindow().getDecorView());
         refresh();
     }
 

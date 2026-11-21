@@ -51,6 +51,8 @@ public class AutomationActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        LanguageManager.apply(getWindow().getDecorView());
+        LanguageManager.watch(getWindow().getDecorView());
         render();
         handler.removeCallbacks(refresh);
         handler.postDelayed(refresh, 2000L);

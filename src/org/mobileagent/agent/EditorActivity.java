@@ -56,6 +56,8 @@ public class EditorActivity extends Activity {
             return;
         }
         setContentView(buildUi());
+        LanguageManager.apply(getWindow().getDecorView());
+        LanguageManager.watch(getWindow().getDecorView());
         loadFile();
     }
 

@@ -349,6 +349,7 @@ final class AgentKit {
         if (window != null) {
             window.setLayout(MATCH, MATCH);
             LanguageManager.apply(window.getDecorView());
+            LanguageManager.watch(window.getDecorView());
         }
         return dialog;
     }
@@ -406,6 +407,7 @@ final class AgentKit {
         if (window != null) {
             window.setLayout(MATCH, WRAP);
             LanguageManager.apply(window.getDecorView());
+            LanguageManager.watch(window.getDecorView());
         }
         return dialog;
     }

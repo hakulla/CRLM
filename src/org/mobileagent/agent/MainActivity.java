@@ -559,6 +559,7 @@ public class MainActivity extends Activity {
             }
         }
         LanguageManager.apply(getWindow().getDecorView());
+        LanguageManager.watch(getWindow().getDecorView());
         handler.removeCallbacks(healthRunnable);
         handler.postDelayed(healthRunnable, 5000L);
     }

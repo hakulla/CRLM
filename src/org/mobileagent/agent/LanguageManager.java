@@ -2,6 +2,7 @@ package org.mobileagent.agent;
 
 import android.content.Context;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 /** Small runtime localization layer for UI strings; code comments are never translated. */
 final class LanguageManager {
@@ -41,6 +43,10 @@ final class LanguageManager {
     }
 
     static String t(Context context, String text) {
+        return t(context, text, false);
+    }
+
+    static String t(Context context, String text, boolean partial) {
         if (text == null || text.isEmpty()) {
             return text == null ? "" : text;
         }
@@ -50,7 +56,23 @@ final class LanguageManager {
         }
         Map<String, String> map = pack(context, code);
         String value = map.get(text);
-        return value == null || value.isEmpty() ? text : value;
+        if (value != null && !value.isEmpty()) {
+            return value;
+        }
+        if (!partial || text.length() > 160 || text.indexOf('\n') >= 0) {
+            return text;
+        }
+        // Translate stable UI phrases inside formatted labels/status lines.
+        String result = text;
+        List<Map.Entry<String, String>> entries = new ArrayList<>(map.entrySet());
+        entries.sort((a, b) -> Integer.compare(b.getKey().length(), a.getKey().length()));
+        for (Map.Entry<String, String> entry : entries) {
+            String key = entry.getKey();
+            if (key.length() >= 4 && result.contains(key)) {
+                result = result.replace(key, entry.getValue());
+            }
+        }
+        return result;
     }
 
     static String label(Context context) {
@@ -85,10 +107,7 @@ final class LanguageManager {
 
     static String displayName(Context context, String code) {
         if (DEFAULT.equals(code)) {
-            return "English";
-        }
-        if ("zh".equals(code)) {
-            return "Chinese";
+            return DEFAULT.equals(current(context)) ? "English" : t(context, "English");
         }
         Map<String, String> map = pack(context, code);
         String name = NAMES.get(code);
@@ -174,6 +193,20 @@ final class LanguageManager {
         if (!temp.renameTo(target)) {
             throw new IllegalStateException("Cannot save language pack");
         }
+    }
+
+    private static final WeakHashMap<View, Boolean> WATCHED = new WeakHashMap<>();
+
+    static void watch(final View root) {
+        if (root == null || WATCHED.put(root, Boolean.TRUE) != null) {
+            return;
+        }
+        root.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                apply(root);
+            }
+        });
     }
 
     /** Applies exact UI-string translations to a view tree. Dynamic/model content is left alone. */
