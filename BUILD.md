@@ -3,22 +3,25 @@
 ## Requirements
 
 - JDK 17 or newer (`javac`, `java`, `keytool`)
-- Android SDK build-tools with `aapt2`, `d8`, `zipalign`, `apksigner`
-- Android platform `android.jar`
+- Android SDK build-tools 36.1.0 with `aapt2`, `d8`, `zipalign`, `apksigner`
+- Android platform 36 `android.jar`
 - For native rebuilds only: Android NDK + CMake + a compatible llama.cpp source tree
 
 No Gradle is used. The build sequence is resources → javac → d8 → package → sign.
 
-## Desktop / macOS
+## Desktop / macOS / Linux
 
 ```sh
-export JAVA_HOME=/path/to/jdk
-export ANDROID_HOME=$HOME/Library/Android/sdk
+export JAVA_HOME=/path/to/jdk17
+export ANDROID_HOME=/path/to/android-sdk
 ./build.sh
 ```
 
-Output: `build/MobileAgent.apk`. The script creates a debug keystore on first run if none is supplied.
-Do not commit a keystore.
+Output: `build/MobileAgent.apk`. The script creates a debug keystore on first run if none is
+supplied. Do not commit a keystore.
+
+The CI workflow in `.github/workflows/build.yml` runs the same Lite build on Ubuntu with platform
+36 and build-tools 36.1.0.
 
 ## Termux
 
@@ -32,8 +35,9 @@ src/org/mobileagent/agent/   Java sources
 test-src/                    standalone test sources
 res/                         resources
 native/                      JNI wrapper and CMake description
-deps/                        JavaParser jar and its license
+deps/                        JavaParser, license texts, and notices
 lib/arm64-v8a/               prebuilt ARM64 runtime
+docs/                        architecture and release documentation
 ```
 
 ## Native libraries
@@ -69,4 +73,10 @@ toolchain/crlm-debug.keystore
 ```
 
 `BootstrapInstaller` writes them to `/sdcard/MobileAgent/`. The debug keystore is only for
-self-built debug APKs; do not reuse it for a public release.
+self-built debug APKs; do not reuse it for a public release. For self-updates to work, the keystore
+in the installed bootstrap must match the APK signing certificate.
+
+## Source availability
+
+CRLM is licensed under AGPL-3.0-only. Release assets include a source archive, and the APK ships a
+source seed for on-device rebuilding. See [LICENSE](LICENSE) and [NOTICE](NOTICE).

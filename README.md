@@ -1,11 +1,17 @@
 # CRLM
 
-**Craft · Run · Learn · Mutate - turn an Android phone into an agent that can build its own apps.**
+[![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE)
+[![Latest release](https://img.shields.io/github/v/release/hakulla/CRLM)](https://github.com/hakulla/CRLM/releases)
+
+**Craft · Run · Learn · Mutate — turn an Android phone into an agent that can build its own apps.**
 
 No desktop. No cloud build queue. Describe the app you want, and the agent reads its own source,
 edits it, runs the local Android build chain, installs the APK, restarts, and keeps iterating.
 It is not just a chat assistant: it is a pocket workshop that turns ideas into runnable Android
 apps and continuously improves itself.
+
+> **Project status:** pre-release, version 1.3.3. Licensed under AGPL-3.0-only; see
+> [License](#license).
 
 ## Highlights
 
@@ -51,9 +57,9 @@ apps and continuously improves itself.
 - Local models run fully offline; cloud models are used only after you configure them.
 - API keys, device passwords, and debug tokens are not stored in the repository.
 
-## What it has built
+## What it can build
 
-These are the kinds of apps that have been built, iterated, and installed on the phone:
+These are the kinds of apps the agent has built, iterated, and installed on a phone:
 
 - **GardenAir**: an environment dashboard with sensor readings, trends, care suggestions, and
   history.
@@ -80,16 +86,17 @@ Both variants seed the source into
 `/sdcard/MobileAgent/projects/mobile-agent` on first launch. The seed is initialized once and does
 not overwrite an existing edited source tree.
 
-Lite downloads from the public Release. The repository is currently **Private**, so use Offline
-for now; Lite becomes fully automatic after the repository is public.
+Lite downloads from the latest Release. If that download is unavailable, use the Offline build.
 
 ### After installing
 
 1. Grant file/all-files access, install-unknown-apps, accessibility, notifications, and camera
    permissions as needed.
-2. Configure your model base URL, model name, and API key in Settings.
-3. For local models, place GGUF files in `/sdcard/MobileAgent/models/` and select one in the app.
-4. After permissions are granted, the app prepares `rootfs`, `toolchain`, and source automatically.
+2. On Android 13 and later, allow restricted settings before enabling the CRLM accessibility
+   service.
+3. Configure your model base URL, model name, and API key in Settings.
+4. For local models, place GGUF files in `/sdcard/MobileAgent/models/` and select one in the app.
+5. After permissions are granted, the app prepares `rootfs`, `toolchain`, and source automatically.
 
 > The build environment and source are handled automatically. Model keys are never bundled.
 
@@ -121,23 +128,68 @@ read source → edit/generate code → bump version → build APK locally
 
 ## Build from source
 
-The repository does not use Gradle. You need a JDK, Android SDK build-tools, and an Android
-platform `android.jar`.
+The repository does not use Gradle. You need JDK 17 or newer, Android SDK build-tools, and an
+Android platform `android.jar`.
 
 ```sh
+export JAVA_HOME=/path/to/jdk17
+export ANDROID_HOME=/path/to/android-sdk
 ./build.sh                                   # Lite (no build environment)
 BOOTSTRAP_ZIP=/path/bootstrap.zip ./build.sh # Offline (build environment bundled)
 ./build-phone.sh                             # Termux with the local toolchain
 ```
 
 The build packages the current source as `assets/source-seed.zip` inside the APK, so a fresh
-install still receives its own source. See [BUILD.md](BUILD.md) for details.
+install still receives its own source. See [BUILD.md](BUILD.md) for details and
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the runtime design.
+
+## Documentation
+
+- [Build](BUILD.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Releasing](docs/RELEASING.md)
+- [Security](SECURITY.md)
+- [Privacy](PRIVACY.md)
+- [Contributing](CONTRIBUTING.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Changelog](CHANGELOG.md)
+- [Third-party notices](THIRD_PARTY_NOTICES.md)
+
+## Known limitations
+
+- The built-in WebView browser timed out on the Android 14 tablet used for the 1.3.3 regression;
+  a follow-up fix is pending. Other tools are unaffected.
+- Android 13+ may require "Allow restricted settings" before the accessibility service can be
+  enabled after a sideload or self-update.
+- Loading a local model on a low-memory device can trigger a system "not responding" prompt; choose
+  Wait and allow time for the model to load.
+- On-device builds may skip `zipalign` if it is not installed in the bundled toolchain. The APK
+  still installs; desktop/CI builds are aligned.
 
 ## Security boundaries
 
 CRLM can run shell commands, modify files, install APKs, and operate the UI. Use it only on your
 own device. Do not execute instructions, scripts, or packages from untrusted sources. It does not
 gain root, bypass the system installer, or bypass the lock screen. See [SECURITY.md](SECURITY.md).
+
+## Contributing
+
+Issues and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) first. Please do not
+post API keys, personal data, company source code, or security vulnerabilities in public issues.
+
+## License
+
+CRLM is licensed under the **GNU Affero General Public License, version 3 only
+(AGPL-3.0-only)**. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
+
+If you run a modified version as a network service, AGPL-3.0 requires you to offer the
+corresponding source to its users. The source for each release is attached to the GitHub Release,
+and each APK also contains a source seed.
+
+## Trademarks
+
+Android is a trademark of Google LLC. CRLM is not affiliated with or endorsed by Google. Other
+product names and trademarks belong to their respective owners.
 
 ## Third-party components
 

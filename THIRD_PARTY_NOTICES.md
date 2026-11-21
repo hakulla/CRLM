@@ -1,7 +1,8 @@
 # Third-party notices
 
-CRLM packages or invokes the following third-party components. The rootfs packages are built and
-distributed by the Termux project; their licenses follow the upstream projects.
+CRLM is licensed under AGPL-3.0-only. The components below remain under their own licenses; the
+AGPL does not replace or override those terms. The rootfs packages are built and distributed by the
+Termux project; their licenses follow the upstream projects.
 
 ## Bundled in the app
 

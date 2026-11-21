@@ -1,0 +1,8 @@
+CRLM
+Copyright (c) 2026 The CRLM authors
+
+This project is licensed under the GNU Affero General Public License,
+version 3 only (AGPL-3.0-only). See LICENSE for the full terms.
+
+Third-party components remain under their own licenses. See
+THIRD_PARTY_NOTICES.md and the files in deps/.
