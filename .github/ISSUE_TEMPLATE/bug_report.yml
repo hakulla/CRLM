@@ -13,7 +13,7 @@ body:
     attributes:
       label: CRLM version
       description: App version and build variant
-      placeholder: "1.3.4 (147), Offline"
+      placeholder: "1.3.5 (148), Offline"
     validations:
       required: true
   - type: input

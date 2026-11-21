@@ -8,6 +8,7 @@ import java.util.Locale;
 final class ModelProfile {
     static final int DEFAULT_CONTEXT = 128000;
     static final int DEFAULT_MAX_OUTPUT = 8192;
+    static final int CAPABILITY_VERSION = 2;
     static final String DEFAULT_EFFORT = "high";
 
     final String id;
@@ -18,6 +19,7 @@ final class ModelProfile {
     boolean thinking;
     String effort = DEFAULT_EFFORT;
     String protocol = ModelProtocols.AUTO;
+    int capabilityVersion = CAPABILITY_VERSION;
 
     ModelProfile(String id) {
         this.id = id == null ? "" : id;
@@ -30,8 +32,11 @@ final class ModelProfile {
             profile.contextTokens = 400000;
         } else if (key.contains("glm")) {
             profile.contextTokens = 200000;
-        } else if (key.equals("deepseek-flash") || key.equals("deepseek-chat")
-                || key.contains("deepseek-reasoner")) {
+        } else if (key.equals("deepseek-flash") || key.contains("deepseek-v4")
+                || key.equals("deepseek-chat")) {
+            profile.contextTokens = 1000000;
+            profile.maxOutputTokens = 65536;
+        } else if (key.contains("deepseek-reasoner")) {
             profile.contextTokens = 128000;
         } else if (key.contains("deepseek") || key.contains("kimi")
                 || key.contains("qwen")) {
@@ -39,7 +44,9 @@ final class ModelProfile {
         }
         profile.vision = key.contains("gpt-6") || key.contains("claude")
                 || key.contains("grok") || key.contains("qwen3.8")
-                || key.contains("vision") || key.contains("-vl") || key.contains("omni");
+                || key.contains("vision") || key.contains("-vl") || key.contains("omni")
+                || key.contains("deepseek-flash") || key.contains("deepseek-v4")
+                || key.equals("deepseek-chat");
         profile.thinking = key.contains("deepseek") || key.contains("qwen3")
                 || key.contains("glm") || key.contains("kimi-k2")
                 || key.contains("grok") || key.contains("claude")
@@ -62,6 +69,7 @@ final class ModelProfile {
             object.put("thinking", thinking);
             object.put("effort", effort);
             object.put("protocol", protocol);
+            object.put("capabilityVersion", capabilityVersion);
         } catch (Exception ignored) {
         }
         return object;
@@ -84,6 +92,14 @@ final class ModelProfile {
         profile.effort = normalizeEffort(effort);
         profile.protocol = ModelProtocols.normalize(
                 object.optString("protocol", ModelProtocols.AUTO));
+        if (object.optInt("capabilityVersion", 0) < CAPABILITY_VERSION) {
+            ModelProfile inferred = infer(id);
+            profile.contextTokens = Math.max(profile.contextTokens, inferred.contextTokens);
+            profile.maxOutputTokens = Math.max(profile.maxOutputTokens,
+                    inferred.maxOutputTokens);
+            profile.vision = profile.vision || inferred.vision;
+        }
+        profile.capabilityVersion = CAPABILITY_VERSION;
         return profile;
     }
 

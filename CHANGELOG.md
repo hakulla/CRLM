@@ -17,6 +17,15 @@ application releases.
 
 - General documentation and repository metadata prepared for public distribution.
 
+## [1.3.5] - 2026-11-21
+
+### Fixed
+
+- DeepSeek Flash and DeepSeek V4 profiles now infer vision support, 1M context, and 65536 output
+  tokens. Existing model profiles migrate once, so image attachments are sent to the model instead
+  of being dropped.
+- Image requests no longer receive a false "model does not support images" system instruction.
+
 ## [1.3.4] - 2026-11-21
 
 ### Fixed
