@@ -10,10 +10,10 @@ aid, not legal advice.
 - [x] README with features, install, build, security, privacy, support, and license sections
 - [x] BUILD, ARCHITECTURE, RELEASING, SECURITY, PRIVACY, CHANGELOG
 - [x] CONTRIBUTING and CODE_OF_CONDUCT
-- [x] Issue templates, private security contact, and PR template
+- [x] Issue templates, vulnerability report form, private security guidance, and PR template
 - [x] CI build workflow prepared in `docs/ci/build.yml.example`
 - [ ] Activate the CI workflow under `.github/workflows/` with a workflow-scoped credential
-- [ ] Enable private vulnerability reporting in GitHub after the repository is public
+- [ ] Enable private vulnerability reporting after the repository is public
 - [x] Repository description and topics
 - [x] Secret/device-identifier scan of the current tree, history, and release assets
 - [x] Generated binaries and keystores excluded from Git
