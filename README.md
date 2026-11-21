@@ -153,6 +153,7 @@ install still receives its own source. See [BUILD.md](BUILD.md) for details and
 - [Contributing](CONTRIBUTING.md)
 - [Code of Conduct](CODE_OF_CONDUCT.md)
 - [Changelog](CHANGELOG.md)
+- [CI setup](docs/ci/README.md)
 - [Third-party notices](THIRD_PARTY_NOTICES.md)
 
 ## Known limitations

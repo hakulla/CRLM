@@ -13,6 +13,7 @@ aid, not legal advice.
 - [x] Issue templates, private security contact, and PR template
 - [x] CI build workflow prepared in `docs/ci/build.yml.example`
 - [ ] Activate the CI workflow under `.github/workflows/` with a workflow-scoped credential
+- [ ] Enable private vulnerability reporting in GitHub after the repository is public
 - [x] Repository description and topics
 - [x] Secret/device-identifier scan of the current tree, history, and release assets
 - [x] Generated binaries and keystores excluded from Git

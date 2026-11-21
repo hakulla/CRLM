@@ -20,8 +20,9 @@ export ANDROID_HOME=/path/to/android-sdk
 Output: `build/MobileAgent.apk`. The script creates a debug keystore on first run if none is
 supplied. Do not commit a keystore.
 
-The CI workflow in `.github/workflows/build.yml` runs the same Lite build on Ubuntu with platform
-36 and build-tools 36.1.0.
+A ready-to-use CI workflow is provided in `docs/ci/build.yml.example`. It runs the same Lite build
+on Ubuntu with platform 36 and build-tools 36.1.0. GitHub requires a credential with the `workflow`
+scope to activate it under `.github/workflows/`; see [docs/ci/README.md](docs/ci/README.md).
 
 ## Termux
 

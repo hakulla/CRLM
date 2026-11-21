@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Security vulnerability
-    url: https://github.com/hakulla/CRLM/security/advisories/new
-    about: Report security issues privately; do not open a public issue.
+    url: https://github.com/hakulla/CRLM/security
+    about: Report security issues privately through the repository Security tab; do not open a public issue.
   - name: Code of Conduct concern
-    url: https://github.com/hakulla/CRLM/security/advisories/new
+    url: https://github.com/hakulla/CRLM/security
     about: Report conduct concerns privately when confidentiality is needed.

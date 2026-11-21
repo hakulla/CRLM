@@ -46,7 +46,9 @@ network. These are real device capabilities, so the following boundaries are par
 ## Reporting a vulnerability
 
 Use GitHub's private vulnerability reporting from the repository's **Security** tab
-(https://github.com/hakulla/CRLM/security/advisories/new). Do not open a public issue.
+(https://github.com/hakulla/CRLM/security) if it is enabled. If it is not yet enabled, contact the
+maintainer privately through GitHub instead of opening a public issue. Maintainers should enable
+private vulnerability reporting before the public launch.
 
 Include:
 

@@ -31,7 +31,7 @@ spaces where someone is representing the project.
 ## Reporting
 
 For conduct concerns, contact the maintainer privately through GitHub (the repository owner
-profile) or use a private GitHub Security Advisory when confidentiality is important. Do not post
+profile) or through the repository's Security tab when confidentiality is important. Do not post
 personal or sensitive details in a public issue.
 
 Reports will be reviewed as promptly as possible. The maintainer may remove content, request an
